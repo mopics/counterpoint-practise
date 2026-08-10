@@ -4,6 +4,7 @@ import type { EventRef, FlattenedTune } from '../abc/types';
 import { orderedRange } from '../abc/eventRef';
 import { endSecondsForRef, secondsForRef } from '../abc/timing';
 import libraryStore from './LibraryStore';
+import editorStore from './EditorStore';
 
 export type PlaybackStatus = 'idle' | 'loading' | 'playing' | 'paused';
 
@@ -43,9 +44,9 @@ class PlaybackStore {
     synthEngine.onEnded(() => this.handleEnded());
 
     reaction(
-      () => libraryStore.selected,
-      () => {
-        void this.loadSelected();
+      () => editorStore.currentAbcSource(libraryStore.selected),
+      (abcSource) => {
+        void this.loadSelected(abcSource);
       },
       { fireImmediately: true },
     );
@@ -55,8 +56,7 @@ class PlaybackStore {
     this.cursor = ref;
   }
 
-  async loadSelected(): Promise<void> {
-    const abcSource = libraryStore.selected.data;
+  async loadSelected(abcSource: string): Promise<void> {
     if (!abcSource) return;
 
     this.status = 'loading';
