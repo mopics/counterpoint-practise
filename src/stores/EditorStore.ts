@@ -43,7 +43,8 @@ class EditorStore {
 
   setText(entry: AbcData, text: string): void {
     const key = keyFor(entry);
-    if (text === entry.data) this.edits.delete(key);
+    const original = entry.data ?? '';
+    if (text === original) this.edits.delete(key);
     else this.edits.set(key, text);
 
     const existingTimer = this.commitDebounce.get(key);
@@ -66,7 +67,8 @@ class EditorStore {
 
   private commit(entry: AbcData, text: string): void {
     const key = keyFor(entry);
-    if (text === entry.data) this.committed.delete(key);
+    const original = entry.data ?? '';
+    if (text === original) this.committed.delete(key);
     else this.committed.set(key, text);
     this.commitDebounce.delete(key);
   }
