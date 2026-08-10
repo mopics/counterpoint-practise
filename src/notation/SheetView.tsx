@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { parseTune } from '../abc/parseTune';
 import { flattenTune } from '../abc/flatten';
-import type { EventRef } from '../abc/types';
+import type { EventRef, FlattenedTune } from '../abc/types';
 import { isEventInRange } from '../abc/eventRef';
 import { layoutLine, type LineLayout } from './layout';
 import { Staff } from './Staff';
@@ -15,7 +15,7 @@ import { computeBeamInfo } from './beaming';
 import { TripletBrackets } from './TripletBracket';
 import { GraceNoteGlyph } from './GraceNote';
 import { OrnamentGlyphs } from './Ornament';
-import { TieSlurLayer, computeSlurSpans } from './TieSlur';
+import { TieSlurLayer, computeSlurSpans, type SlurSpan } from './TieSlur';
 import { PlayCursorMarker } from './PlayCursor';
 import { SelectionOverlay } from './SelectionOverlay';
 import { CHORD_ROW_HEIGHT, LINE_VERTICAL_GAP, STAFF_HEIGHT, STAFF_TOP_OFFSET } from './geometry';
@@ -26,6 +26,31 @@ interface Props {
   selectionStart?: EventRef | null;
   selectionEnd?: EventRef | null;
   onSelectionChange?: (start: EventRef | null, end: EventRef | null) => void;
+}
+
+interface ParsedSheet {
+  flattened: FlattenedTune;
+  layouts: Map<number, LineLayout>;
+  slurSpans: SlurSpan[];
+  width: number;
+  height: number;
+}
+
+function parseSheet(abcSource: string): ParsedSheet {
+  const tune = parseTune(abcSource);
+  const flattened = flattenTune(tune);
+  const layouts = new Map<number, LineLayout>();
+  let maxWidth = 0;
+  flattened.lines.forEach((line, i) => {
+    const staffTopY = i * LINE_VERTICAL_GAP + STAFF_TOP_OFFSET;
+    const staffBottomY = staffTopY + STAFF_HEIGHT;
+    const ll = layoutLine(line, staffTopY, staffBottomY);
+    layouts.set(line.lineIndex, ll);
+    maxWidth = Math.max(maxWidth, ll.contentWidth);
+  });
+  const slurSpans = computeSlurSpans(flattened.lines);
+  const height = flattened.lines.length * LINE_VERTICAL_GAP + 20;
+  return { flattened, layouts, slurSpans, width: maxWidth, height };
 }
 
 function hitTest(layouts: Map<number, LineLayout>, x: number, y: number): EventRef | null {
@@ -50,22 +75,25 @@ export function SheetView({ abcSource, cursor, selectionStart, selectionEnd, onS
   const dragAnchor = useRef<EventRef | null>(null);
   const dragging = useRef(false);
 
-  const { flattened, layouts, slurSpans, width, height } = useMemo(() => {
-    const tune = parseTune(abcSource);
-    const flattened = flattenTune(tune);
-    const layouts = new Map<number, LineLayout>();
-    let maxWidth = 0;
-    flattened.lines.forEach((line, i) => {
-      const staffTopY = i * LINE_VERTICAL_GAP + STAFF_TOP_OFFSET;
-      const staffBottomY = staffTopY + STAFF_HEIGHT;
-      const ll = layoutLine(line, staffTopY, staffBottomY);
-      layouts.set(line.lineIndex, ll);
-      maxWidth = Math.max(maxWidth, ll.contentWidth);
-    });
-    const slurSpans = computeSlurSpans(flattened.lines);
-    const height = flattened.lines.length * LINE_VERTICAL_GAP + 20;
-    return { flattened, layouts, slurSpans, width: maxWidth, height };
+  const lastGoodRef = useRef<ParsedSheet | null>(null);
+  const { parsed, stale } = useMemo(() => {
+    try {
+      const result = parseSheet(abcSource);
+      lastGoodRef.current = result;
+      return { parsed: result, stale: false };
+    } catch {
+      return { parsed: lastGoodRef.current, stale: lastGoodRef.current !== null };
+    }
   }, [abcSource]);
+
+  if (!parsed) {
+    return (
+      <div className="p-4 text-sm text-slate-500">
+        Nothing to show yet — start typing valid ABC to see the sheet.
+      </div>
+    );
+  }
+  const { flattened, layouts, slurSpans, width, height } = parsed;
 
   const svgPoint = (e: React.PointerEvent<SVGSVGElement>): { x: number; y: number } => {
     const svg = e.currentTarget;
@@ -103,6 +131,11 @@ export function SheetView({ abcSource, cursor, selectionStart, selectionEnd, onS
         <p className="text-xs text-slate-500">
           Key: {flattened.key || 'C'} &middot; Meter: {flattened.meter} &middot; &#9833;={Math.round(flattened.qpm)}
         </p>
+        {stale && (
+          <p className="mt-1 rounded bg-amber-50 px-2 py-1 text-xs text-amber-700">
+            Showing last valid version — the current text has a parse error.
+          </p>
+        )}
       </div>
       <svg
         width={width}
