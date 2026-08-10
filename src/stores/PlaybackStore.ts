@@ -20,6 +20,7 @@ class PlaybackStore {
 
   private swingDebounce: ReturnType<typeof setTimeout> | null = null;
   private lastLoadedEntry: AbcData | null = null;
+  private loadGeneration = 0;
 
   constructor() {
     makeObservable(this, {
@@ -66,6 +67,7 @@ class PlaybackStore {
   async loadSelected(abcSource: string, isEntrySwitch: boolean): Promise<void> {
     if (!abcSource) return;
 
+    const generation = ++this.loadGeneration;
     const wasPlaying = this.status === 'playing';
     this.status = 'loading';
     if (isEntrySwitch) {
@@ -77,12 +79,14 @@ class PlaybackStore {
 
     try {
       const flattened = await synthEngine.load(abcSource);
+      if (generation !== this.loadGeneration) return;
       runInAction(() => {
         this.flattened = flattened;
         this.status = 'idle';
         if (!isEntrySwitch && wasPlaying) this.play();
       });
     } catch (err) {
+      if (generation !== this.loadGeneration) return;
       console.error('Failed to load tune for playback:', err);
       runInAction(() => {
         this.status = 'idle';
