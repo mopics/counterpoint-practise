@@ -18,7 +18,7 @@ function keyFor(entry: AbcData): string {
 class EditorStore {
   private edits = observable.map<string, string>();
   private committed = observable.map<string, string>();
-  private commitDebounce: ReturnType<typeof setTimeout> | null = null;
+  private commitDebounce = new Map<string, ReturnType<typeof setTimeout>>();
 
   constructor() {
     makeObservable(this, {
@@ -46,19 +46,21 @@ class EditorStore {
     if (text === entry.data) this.edits.delete(key);
     else this.edits.set(key, text);
 
-    if (this.commitDebounce) clearTimeout(this.commitDebounce);
-    this.commitDebounce = setTimeout(() => {
+    const existingTimer = this.commitDebounce.get(key);
+    if (existingTimer) clearTimeout(existingTimer);
+    this.commitDebounce.set(key, setTimeout(() => {
       runInAction(() => this.commit(entry, text));
-    }, COMMIT_DEBOUNCE_MS);
+    }, COMMIT_DEBOUNCE_MS));
   }
 
   resetText(entry: AbcData): void {
     const key = keyFor(entry);
     this.edits.delete(key);
     this.committed.delete(key);
-    if (this.commitDebounce) {
-      clearTimeout(this.commitDebounce);
-      this.commitDebounce = null;
+    const existingTimer = this.commitDebounce.get(key);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+      this.commitDebounce.delete(key);
     }
   }
 
@@ -66,6 +68,7 @@ class EditorStore {
     const key = keyFor(entry);
     if (text === entry.data) this.committed.delete(key);
     else this.committed.set(key, text);
+    this.commitDebounce.delete(key);
   }
 }
 
