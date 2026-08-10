@@ -1,0 +1,33 @@
+// from https://www.youtube.com/watch?v=Lz0VkjdgL10
+
+export const MORITAT_COLLUSUS = {
+    id: "moritat-collusus",
+    title: "Moritat (Collusus)",
+    key: "C",
+    data: `X: 1
+T: MORITAT S.Rollins (Collusus)
+M:4/4
+L:1/8
+Q: 200
+C: https://www.youtube.com/watch?v=Lz0VkjdgL10
+||**C**"C6" z4 E2 G2 | A3 A z4 | z3 A E2 G2 | "D-" A3 A z4 | z3 A D2 F2 | 
+"G7" A3 A z4 | z3 AD2F2 | "C6" A3 A z4 | z4 (3z2G2A2 | 
+"A-7" d3 c-c4- | c4 BBA2 | "D-7" c3D-D4 | z4 E^CDE | 
+"D-7" FG^GA c2 D2 | "D-7"c4 "G7"B3 A- | "C6"A4 z4 | z4 E2 G2 ||
+T: R2
+|| "C6" A3 A z4 |z3 A E2 G2 |  "D-" A3 A z4 | z3 A D2 F2 | 
+"G7" A3 A z4 | z3 AD2F2 | "C6" A3 A z4 | z4 z3 B | 
+"A-7"d2 z c-c2 z2| z3c B^GAB| "D-7" c4 D4 | z4 DFA2 |
+c4 D4 | c4 "G7"B4 | "C6"A4 z2 _E2 | D4 _E4 ||
+T: R3
+||"C6" EE zA BdBG | B2G2A3G | "D-7"AA z6 | z3 d afde |
+"G7" ge fg/f/ ecAG | ecd_e B(3_B/A/_A/ GF | "C6" E4A2 z2| z3A _B_d_AF | 
+"A7" B^GAB cde^g | b^ga^f ecBA | "D-7" e2 cA F4 | z4 df a2|
+"D-7"d'2z2z2za| c'abg "G7" afed | "C6" bga2 e^c_BG | dfed gdBG ||
+T: R4
+||"C6" dBAE G2 z2 | z4 b3 e |"D-7" aa z2 z4| z2 z e fgec | 
+"G7"FF-F2 z4 | z3 e dcAB | "C6" a2 ge-e2 z2 | z2 (3e^gb f'2 e'd' | 
+"A-7"c'e^gb a^f c2 | z4 (3c'2b2a2 | "D-7"c'3 d-d4| z3 d e^cde|
+"D-7"fg^ga e'd'c'a|fd (3b/c'/b/a "G7"gfed | "C6"g2eg ^c4| z3 g _b_a_b_a ||
+`
+};
