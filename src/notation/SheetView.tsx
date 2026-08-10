@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { memo, useMemo, useRef } from 'react';
 import { parseTune } from '../abc/parseTune';
 import { flattenTune } from '../abc/flatten';
 import type { EventRef, FlattenedTune } from '../abc/types';
@@ -39,6 +39,7 @@ interface ParsedSheet {
 function parseSheet(abcSource: string): ParsedSheet {
   const tune = parseTune(abcSource);
   const flattened = flattenTune(tune);
+  if (flattened.lines.length === 0) throw new Error('No parseable tune content');
   const layouts = new Map<number, LineLayout>();
   let maxWidth = 0;
   flattened.lines.forEach((line, i) => {
@@ -71,7 +72,7 @@ function hitTest(layouts: Map<number, LineLayout>, x: number, y: number): EventR
   return { lineIndex, eventIndex: best.eventIndex };
 }
 
-export function SheetView({ abcSource, cursor, selectionStart, selectionEnd, onSelectionChange }: Props) {
+export const SheetView = memo(function SheetView({ abcSource, cursor, selectionStart, selectionEnd, onSelectionChange }: Props) {
   const dragAnchor = useRef<EventRef | null>(null);
   const dragging = useRef(false);
 
@@ -81,7 +82,8 @@ export function SheetView({ abcSource, cursor, selectionStart, selectionEnd, onS
       const result = parseSheet(abcSource);
       lastGoodRef.current = result;
       return { parsed: result, stale: false };
-    } catch {
+    } catch (err) {
+      console.warn('SheetView: failed to parse ABC source, showing last valid render', err);
       return { parsed: lastGoodRef.current, stale: lastGoodRef.current !== null };
     }
   }, [abcSource]);
@@ -208,4 +210,4 @@ export function SheetView({ abcSource, cursor, selectionStart, selectionEnd, onS
       </svg>
     </div>
   );
-}
+});

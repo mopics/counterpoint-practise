@@ -138,7 +138,7 @@ export function flattenTune(tune: abcjs.TuneObject): FlattenedTune {
   return {
     lines,
     title: tune.metaText.title ?? '',
-    key: `${key.root}${key.acc}${key.mode}`,
+    key: `${key.root ?? ''}${key.acc ?? ''}${key.mode ?? ''}`,
     meter: meterStr,
     qpm: tune.getBpm(),
   };
