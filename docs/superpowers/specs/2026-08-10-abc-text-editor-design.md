@@ -76,6 +76,18 @@ used as a defensive fallback for the map key, consistent with the existing
   "user switched entries" and "user's debounced edit landed," since both
   change the tracked value.
 
+  **Loop/playback state on reload.** Because a reload now also happens
+  ~400ms after every edit (not just on a deliberate entry switch), the
+  reaction additionally tracks `libraryStore.selected` itself alongside the
+  resolved ABC source, so `loadSelected` can distinguish an entry switch
+  from an edit-triggered reload (`entry !== lastLoadedEntry`). Resolved
+  decision: **editing preserves the current loop selection and resumes
+  playback automatically if it was playing; only switching to a different
+  library entry resets loop selection and stops/idles playback.** Cursor
+  position is always reset on any reload (entry-switch or edit), since
+  playback position is inherently stale once the underlying timing table is
+  rebuilt.
+
 ## UI / layout
 
 - New `AbcEditorPanel.tsx`: a `<textarea>` (monospace font, full height),
@@ -98,14 +110,26 @@ used as a defensive fallback for the map key, consistent with the existing
 `SheetView`'s `parseTune`/`flattenTune` call (inside a `useMemo`) is not
 currently wrapped in error handling — it has only ever received known-good
 library content. Once users can type arbitrary, often mid-edit and invalid
-ABC, that call can throw (e.g. `abcjs.parseOnly` returning no tunes for
-unparseable/empty input, then `flattenTune` dereferencing `undefined`).
+ABC, that call needs to fail safely.
+
+In practice, `abcjs.parseOnly` never throws and never returns an empty tune
+array — for unparseable or empty input it returns a best-effort tune object
+with zero content lines instead. So the actual failure signal used by
+`parseSheet` is `flattened.lines.length === 0` (checked right after
+`flattenTune` runs), which is explicitly thrown as an `Error` to drive the
+fallback path below. The surrounding try/catch is kept as genuine
+defense-in-depth against `flattenTune`/`layoutLine`/`computeSlurSpans` (the
+app's own code, operating on loosely-typed abcjs output) throwing for other
+reasons on degenerate input.
 
 Fix: wrap the parse+flatten body in try/catch inside the `useMemo`, caching
 the last successful result in a `useRef`. On a parse failure, `SheetView`
 keeps rendering the cached result instead of throwing, and shows a small
 inline notice (e.g. "showing last valid version") so it's clear the sheet
-isn't reflecting the very latest keystrokes.
+isn't reflecting the very latest keystrokes. The catch block also
+`console.warn`s the error so a genuine bug in the app's own flatten/layout
+code (as opposed to a user's ordinary in-progress invalid typing) stays
+visible to developers.
 
 ## Testing
 

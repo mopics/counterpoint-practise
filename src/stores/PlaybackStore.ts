@@ -1,9 +1,11 @@
 import { actionBound, makeObservable, observable, observableRef, reaction, runInAction } from 'mobx';
 import { synthEngine } from '../playback/synthEngine';
+import type { AbcData } from '../content';
 import type { EventRef, FlattenedTune } from '../abc/types';
 import { orderedRange } from '../abc/eventRef';
 import { endSecondsForRef, secondsForRef } from '../abc/timing';
 import libraryStore from './LibraryStore';
+import editorStore from './EditorStore';
 
 export type PlaybackStatus = 'idle' | 'loading' | 'playing' | 'paused';
 
@@ -17,6 +19,8 @@ class PlaybackStore {
   swing = synthEngine.getSwing();
 
   private swingDebounce: ReturnType<typeof setTimeout> | null = null;
+  private lastLoadedEntry: AbcData | null = null;
+  private loadGeneration = 0;
 
   constructor() {
     makeObservable(this, {
@@ -43,9 +47,14 @@ class PlaybackStore {
     synthEngine.onEnded(() => this.handleEnded());
 
     reaction(
-      () => libraryStore.selected,
-      () => {
-        void this.loadSelected();
+      () => ({
+        entry: libraryStore.selected,
+        abcSource: editorStore.currentAbcSource(libraryStore.selected),
+      }),
+      ({ entry, abcSource }) => {
+        const isEntrySwitch = entry !== this.lastLoadedEntry;
+        this.lastLoadedEntry = entry;
+        void this.loadSelected(abcSource, isEntrySwitch);
       },
       { fireImmediately: true },
     );
@@ -55,23 +64,29 @@ class PlaybackStore {
     this.cursor = ref;
   }
 
-  async loadSelected(): Promise<void> {
-    const abcSource = libraryStore.selected.data;
+  async loadSelected(abcSource: string, isEntrySwitch: boolean): Promise<void> {
     if (!abcSource) return;
 
+    const generation = ++this.loadGeneration;
+    const wasPlaying = this.status === 'playing';
     this.status = 'loading';
-    this.loopStart = null;
-    this.loopEnd = null;
-    this.loopEnabled = false;
+    if (isEntrySwitch) {
+      this.loopStart = null;
+      this.loopEnd = null;
+      this.loopEnabled = false;
+    }
     this.cursor = null;
 
     try {
       const flattened = await synthEngine.load(abcSource);
+      if (generation !== this.loadGeneration) return;
       runInAction(() => {
         this.flattened = flattened;
         this.status = 'idle';
+        if (!isEntrySwitch && wasPlaying) this.play();
       });
     } catch (err) {
+      if (generation !== this.loadGeneration) return;
       console.error('Failed to load tune for playback:', err);
       runInAction(() => {
         this.status = 'idle';
