@@ -21,6 +21,7 @@ interface Props {
   /** Stem direction — shared across a whole beam group when beamed, per-note otherwise. */
   stemUp: boolean;
   selected?: boolean;
+  scaleDegrees?: string[];
 }
 
 function NoteHead({
@@ -60,7 +61,7 @@ function NoteHead({
   );
 }
 
-export function NoteGlyph({ x, pitches, duration, staffBottomY, noteheadStyle, beamed, stemUp: up, selected }: Props) {
+export function NoteGlyph({ x, pitches, duration, staffBottomY, noteheadStyle, beamed, stemUp: up, selected, scaleDegrees }: Props) {
   if (!pitches.length) return null;
   const filled = isFilledNotehead(duration);
   const stemmed = hasStem(duration);
@@ -115,9 +116,11 @@ export function NoteGlyph({ x, pitches, duration, staffBottomY, noteheadStyle, b
 
       {pitches.map((p, i) => {
         const y = pitchToY(p.pitch, staffBottomY);
+        const degree = scaleDegrees?.[i];
+        const color = selected ? '#2563eb' : '#0f172a';
         return (
           <g key={i}>
-            {p.accidental && (
+            {!degree && p.accidental && (
               <AccidentalGlyph
                 x={x - NOTE_RADIUS - 9}
                 y={y}
@@ -125,7 +128,13 @@ export function NoteGlyph({ x, pitches, duration, staffBottomY, noteheadStyle, b
                 color={selected ? '#2563eb' : '#1e293b'}
               />
             )}
-            <NoteHead cx={x} cy={y} filled={filled} style={noteheadStyle} selected={selected} />
+            {degree ? (
+              <text x={x} y={y + 4} textAnchor="middle" fontSize={11} fontFamily="Arial, sans-serif" fill={color}>
+                {degree}
+              </text>
+            ) : (
+              <NoteHead cx={x} cy={y} filled={filled} style={noteheadStyle} selected={selected} />
+            )}
           </g>
         );
       })}
