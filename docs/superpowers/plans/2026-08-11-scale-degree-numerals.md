@@ -119,7 +119,7 @@ describe('extractKeyMarkers', () => {
   it('strips invalid marker content as a no-op, without recording a root', () => {
     const { cleanAbc, markers } = extractKeyMarkers('CD**_**EF');
     expect(markers).toEqual([]);
-    expect(cleanAbc).toBe('CD    EF');
+    expect(cleanAbc).toBe('CD     EF');
   });
 
   it('returns no markers for text with no ** tokens', () => {
@@ -132,7 +132,7 @@ describe('extractKeyMarkers', () => {
     const { markers } = extractKeyMarkers('**F#**C **Bb**D');
     expect(markers).toEqual([
       { charOffset: 0, root: 'F#' },
-      { charOffset: 6, root: 'Bb' },
+      { charOffset: 8, root: 'Bb' },
     ]);
   });
 });
