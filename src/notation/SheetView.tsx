@@ -3,6 +3,8 @@ import { parseTune } from '../abc/parseTune';
 import { flattenTune } from '../abc/flatten';
 import type { EventRef, FlattenedTune } from '../abc/types';
 import { isEventInRange } from '../abc/eventRef';
+import { extractKeyMarkers } from '../abc/keyMarkers';
+import { computeScaleDegrees, type ScaleDegreeOverlay } from '../abc/scaleDegrees';
 import { layoutLine, type LineLayout } from './layout';
 import { Staff } from './Staff';
 import { PartLabel } from './PartLabel';
@@ -25,6 +27,7 @@ interface Props {
   cursor?: EventRef | null;
   selectionStart?: EventRef | null;
   selectionEnd?: EventRef | null;
+  numeralMode?: boolean;
   onSelectionChange?: (start: EventRef | null, end: EventRef | null) => void;
 }
 
@@ -32,14 +35,17 @@ interface ParsedSheet {
   flattened: FlattenedTune;
   layouts: Map<number, LineLayout>;
   slurSpans: SlurSpan[];
+  scaleDegrees: ScaleDegreeOverlay;
   width: number;
   height: number;
 }
 
 function parseSheet(abcSource: string): ParsedSheet {
-  const tune = parseTune(abcSource);
+  const { cleanAbc, markers } = extractKeyMarkers(abcSource);
+  const tune = parseTune(cleanAbc);
   const flattened = flattenTune(tune);
   if (flattened.lines.length === 0) throw new Error('No parseable tune content');
+  const scaleDegrees = computeScaleDegrees(flattened, markers, flattened.keyRoot);
   const layouts = new Map<number, LineLayout>();
   let maxWidth = 0;
   flattened.lines.forEach((line, i) => {
@@ -51,7 +57,7 @@ function parseSheet(abcSource: string): ParsedSheet {
   });
   const slurSpans = computeSlurSpans(flattened.lines);
   const height = flattened.lines.length * LINE_VERTICAL_GAP + 20;
-  return { flattened, layouts, slurSpans, width: maxWidth, height };
+  return { flattened, layouts, slurSpans, scaleDegrees, width: maxWidth, height };
 }
 
 function hitTest(layouts: Map<number, LineLayout>, x: number, y: number): EventRef | null {
@@ -72,7 +78,14 @@ function hitTest(layouts: Map<number, LineLayout>, x: number, y: number): EventR
   return { lineIndex, eventIndex: best.eventIndex };
 }
 
-export const SheetView = memo(function SheetView({ abcSource, cursor, selectionStart, selectionEnd, onSelectionChange }: Props) {
+export const SheetView = memo(function SheetView({
+  abcSource,
+  cursor,
+  selectionStart,
+  selectionEnd,
+  numeralMode,
+  onSelectionChange,
+}: Props) {
   const dragAnchor = useRef<EventRef | null>(null);
   const dragging = useRef(false);
 
@@ -95,7 +108,7 @@ export const SheetView = memo(function SheetView({ abcSource, cursor, selectionS
       </div>
     );
   }
-  const { flattened, layouts, slurSpans, width, height } = parsed;
+  const { flattened, layouts, slurSpans, scaleDegrees, width, height } = parsed;
 
   const svgPoint = (e: React.PointerEvent<SVGSVGElement>): { x: number; y: number } => {
     const svg = e.currentTarget;
@@ -187,6 +200,9 @@ export const SheetView = memo(function SheetView({ abcSource, cursor, selectionS
                       beamed={beamInfo.get(le.eventIndex)?.beamed ?? false}
                       stemUp={beamInfo.get(le.eventIndex)?.stemUp ?? true}
                       selected={selected}
+                      scaleDegrees={
+                        numeralMode ? (scaleDegrees.lines[ll.lineIndex]?.degrees[le.eventIndex] ?? undefined) : undefined
+                      }
                     />
                     {le.event.decorations.length > 0 && (
                       <OrnamentGlyphs
