@@ -2,6 +2,7 @@ import * as abcjs from 'abcjs';
 import { parseTune } from '../abc/parseTune';
 import { flattenTune } from '../abc/flatten';
 import { computeTimingTable, type TimedEvent } from '../abc/timing';
+import { extractKeyMarkers } from '../abc/keyMarkers';
 import type { EventRef, FlattenedTune } from '../abc/types';
 
 type CursorListener = (ref: EventRef | null) => void;
@@ -80,7 +81,12 @@ class SynthEngine {
   async load(abcSource: string): Promise<FlattenedTune> {
     this.teardown();
 
-    const tune = parseTune(abcSource);
+    // Strip **K** key-root markers before handing the source to abcjs, same
+    // as SheetView.tsx's parseSheet() — otherwise abcjs parses the leftover
+    // marker text as real notes/characters, desyncing this timing table's
+    // event sequence from the one actually rendered on screen.
+    const { cleanAbc } = extractKeyMarkers(abcSource);
+    const tune = parseTune(cleanAbc);
     const flattened = flattenTune(tune);
     this.timingTable = computeTimingTable(tune, flattened);
     this.currentTune = tune;
