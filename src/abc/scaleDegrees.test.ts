@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
+import type { AccidentalName } from 'abcjs';
 import { parseTune } from './parseTune';
 import { flattenTune } from './flatten';
 import { extractKeyMarkers } from './keyMarkers';
 import { computeScaleDegrees, pitchClassOf, degreeLabel } from './scaleDegrees';
 import type { NotationPitch } from './types';
 
-function pitch(name: string, accidental?: string): NotationPitch {
+function pitch(name: string, accidental?: AccidentalName): NotationPitch {
   return { pitch: 0, name, accidental, verticalPos: 0, tieStart: false, tieEnd: false, slurStart: [], slurEnd: [] };
 }
 
@@ -83,5 +84,17 @@ describe('computeScaleDegrees', () => {
     const flattened = flattenTune(parseTune(cleanAbc));
     const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot);
     expect(overlay.lines[0].degrees[0]).toEqual(['1', '3']);
+  });
+
+  it('applies a marker to the note it directly precedes, even when a chord symbol comes first', () => {
+    // abcjs anchors a chorded note's startChar at the preceding chord-symbol
+    // annotation (e.g. the opening `"` of `"D-"`), not at the note letter
+    // itself — so a marker sitting between the chord symbol and the note
+    // (the common real-world pattern: `"D-"**D**D...`) must still be
+    // attributed to that note, not the one after it.
+    const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\n"D-"**D**DEFG|\n');
+    const flattened = flattenTune(parseTune(cleanAbc));
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot);
+    expect(overlay.lines[0].degrees).toEqual([['1'], ['2'], ['b3'], ['4']]);
   });
 });

@@ -1,9 +1,10 @@
-import type { FlattenedTune, NotationPitch } from './types';
+import type { AccidentalName } from 'abcjs';
+import type { FlattenedTune, NotationEvent, NotationPitch } from './types';
 import type { KeyMarker } from './keyMarkers';
 
 const NOTE_LETTER_PC: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 
-const ACCIDENTAL_OFFSET: Record<string, number> = {
+const ACCIDENTAL_OFFSET: Record<AccidentalName, number> = {
   natural: 0,
   sharp: 1,
   flat: -1,
@@ -31,13 +32,35 @@ const DEGREE_LABEL_SHARP: Record<number, string> = {
 /** Chromatic pitch class (0-11) of a note. `pitch.pitch` is a diatonic staff
  *  step, not chromatic, so this derives the real sounding pitch from the
  *  letter name plus the note's own accidental, falling back to the tune's
- *  key-signature-implied accidental for that letter when the note has none. */
-export function pitchClassOf(pitch: NotationPitch, keyAccidentals: Record<string, string>): number {
+ *  key-signature-implied accidental for that letter when the note has none.
+ *
+ *  Known limitation: this only consults the note's own explicit accidental
+ *  or the key signature — it does not track an accidental carried over from
+ *  an earlier note earlier in the same measure (ABC's measure-persistence
+ *  rule, e.g. `^FF F,|FF|` should sound the 2nd/3rd F sharp too). This is
+ *  parity with the old app (not a regression) and out of scope here. */
+export function pitchClassOf(pitch: NotationPitch, keyAccidentals: Record<string, AccidentalName>): number {
   const letter = pitch.name.toUpperCase();
   const base = NOTE_LETTER_PC[letter] ?? 0;
   const accidental = pitch.accidental ?? keyAccidentals[letter];
   const offset = accidental ? (ACCIDENTAL_OFFSET[accidental] ?? 0) : 0;
   return ((base + offset) % 12 + 12) % 12;
+}
+
+/**
+ * The character offset at which a note's own text (letter/accidentals/
+ * duration) actually begins — as opposed to `event.startChar`, which abcjs
+ * anchors at the start of a *preceding* chord-symbol annotation when one is
+ * present (e.g. for `"D-"**D**D...`, the note's `startChar` points at the
+ * opening `"` of `"D-"`, not at the note letter). Chord symbols are always
+ * written as a quoted annotation (`"Chord"`) immediately before the note in
+ * ABC source, so stepping past the quoted text (+2 for the two quote
+ * characters) recovers the note's true onset. Without a chord symbol,
+ * `startChar` already points at the note's own text.
+ */
+function noteOnsetChar(event: NotationEvent): number {
+  if (!event.chordSymbol) return event.startChar;
+  return event.startChar + event.chordSymbol.length + 2;
 }
 
 function pcDistance(rootPc: number, notePc: number): number {
@@ -46,7 +69,7 @@ function pcDistance(rootPc: number, notePc: number): number {
 
 /** Scale-degree label for a note relative to a root pitch class. Sharp
  *  spelling is used only when the note itself carries an explicit sharp. */
-export function degreeLabel(rootPc: number, pitch: NotationPitch, keyAccidentals: Record<string, string>): string {
+export function degreeLabel(rootPc: number, pitch: NotationPitch, keyAccidentals: Record<string, AccidentalName>): string {
   const dist = pcDistance(rootPc, pitchClassOf(pitch, keyAccidentals));
   const table = pitch.accidental === 'sharp' ? DEGREE_LABEL_SHARP : DEGREE_LABEL_FLAT;
   return table[dist] ?? '?';
@@ -81,12 +104,13 @@ export function computeScaleDegrees(
     degrees: new Array<string[] | null>(line.events.length).fill(null),
   }));
 
-  for (const { lineIndex, eventIndex, startChar } of allRefs) {
-    while (markerIdx < sortedMarkers.length && sortedMarkers[markerIdx].charOffset <= startChar) {
+  for (const { lineIndex, eventIndex } of allRefs) {
+    const event = flattened.lines[lineIndex].events[eventIndex];
+    const onsetChar = noteOnsetChar(event);
+    while (markerIdx < sortedMarkers.length && sortedMarkers[markerIdx].charOffset <= onsetChar) {
       currentRootPc = ROOT_TO_PC[sortedMarkers[markerIdx].root] ?? currentRootPc;
       markerIdx++;
     }
-    const event = flattened.lines[lineIndex].events[eventIndex];
     if (event.kind !== 'note' || !event.pitches?.length) continue;
     linesOut[lineIndex].degrees[eventIndex] = event.pitches.map((p) =>
       degreeLabel(currentRootPc, p, flattened.keyAccidentals),
