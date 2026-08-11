@@ -135,10 +135,17 @@ export function flattenTune(tune: abcjs.TuneObject): FlattenedTune {
         ? 'C|'
         : meter.value?.map((v) => `${v.num}/${v.den}`).join(' ') ?? '';
 
+  const keyAccidentals: Record<string, string> = {};
+  for (const a of key.accidentals ?? []) {
+    keyAccidentals[a.note.toUpperCase()] = a.acc;
+  }
+
   return {
     lines,
     title: tune.metaText.title ?? '',
     key: `${key.root ?? ''}${key.acc ?? ''}${key.mode ?? ''}`,
+    keyRoot: `${key.root ?? ''}${key.acc ?? ''}`,
+    keyAccidentals,
     meter: meterStr,
     qpm: tune.getBpm(),
   };

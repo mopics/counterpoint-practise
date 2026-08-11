@@ -57,6 +57,8 @@ export interface FlattenedTune {
   lines: NotationLine[];
   title: string;
   key: string;
+  keyRoot: string;
+  keyAccidentals: Record<string, string>;
   meter: string;
   qpm: number;
 }
