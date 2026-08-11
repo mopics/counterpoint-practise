@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { playbackStore } from '../stores';
+import { playbackStore, uiStore } from '../stores';
 
 function Button({
   onClick,
@@ -48,6 +48,10 @@ export const TransportBar = observer(function TransportBar() {
       </Button>
       <Button onClick={() => playbackStore.clearLoop()} disabled={!hasSelection}>
         Clear selection
+      </Button>
+      <div className="mx-2 h-5 w-px bg-slate-200" />
+      <Button onClick={() => uiStore.toggleNumeralMode()} active={uiStore.numeralMode}>
+        🔢 Numerals
       </Button>
       <div className="mx-2 h-5 w-px bg-slate-200" />
       <div className="flex items-center gap-2">

@@ -4,7 +4,7 @@ import { TransportBar } from './components/TransportBar';
 import { AbcEditorPanel } from './components/AbcEditorPanel';
 import { SplitPane } from './components/SplitPane';
 import { SheetView } from './notation/SheetView';
-import { libraryStore, playbackStore, editorStore } from './stores';
+import { libraryStore, playbackStore, editorStore, uiStore } from './stores';
 
 const App = observer(function App() {
   const selected = libraryStore.selected;
@@ -22,6 +22,7 @@ const App = observer(function App() {
               cursor={playbackStore.cursor}
               selectionStart={playbackStore.loopStart}
               selectionEnd={playbackStore.loopEnd}
+              numeralMode={uiStore.numeralMode}
               onSelectionChange={playbackStore.setSelectionRange}
             />
           }
