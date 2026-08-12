@@ -45,7 +45,7 @@ function parseSheet(abcSource: string): ParsedSheet {
   const tune = parseTune(cleanAbc);
   const flattened = flattenTune(tune);
   if (flattened.lines.length === 0) throw new Error('No parseable tune content');
-  const scaleDegrees = computeScaleDegrees(flattened, markers, flattened.keyRoot);
+  const scaleDegrees = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
   const layouts = new Map<number, LineLayout>();
   let maxWidth = 0;
   flattened.lines.forEach((line, i) => {

@@ -54,35 +54,35 @@ describe('computeScaleDegrees', () => {
   it('uses the tune key as the default root when no markers are present', () => {
     const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\nCDEF|\n');
     const flattened = flattenTune(parseTune(cleanAbc));
-    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot);
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
     expect(overlay.lines[0].degrees).toEqual([['1'], ['2'], ['3'], ['4']]);
   });
 
   it('applies a marker occurring before the first note to every note', () => {
     const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\n**F**CDEF|\n');
     const flattened = flattenTune(parseTune(cleanAbc));
-    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot);
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
     expect(overlay.lines[0].degrees).toEqual([['5'], ['6'], ['7'], ['1']]);
   });
 
   it('carries a root forward only from the point the marker occurs', () => {
     const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\nCD**F**EF|\n');
     const flattened = flattenTune(parseTune(cleanAbc));
-    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot);
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
     expect(overlay.lines[0].degrees).toEqual([['1'], ['2'], ['7'], ['1']]);
   });
 
   it('produces null for rests', () => {
     const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\nCz|\n');
     const flattened = flattenTune(parseTune(cleanAbc));
-    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot);
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
     expect(overlay.lines[0].degrees).toEqual([['1'], null]);
   });
 
   it('produces one label per pitch for a chord', () => {
     const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\n[CE]D|\n');
     const flattened = flattenTune(parseTune(cleanAbc));
-    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot);
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
     expect(overlay.lines[0].degrees[0]).toEqual(['1', '3']);
   });
 
@@ -94,7 +94,20 @@ describe('computeScaleDegrees', () => {
     // attributed to that note, not the one after it.
     const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\n"D-"**D**DEFG|\n');
     const flattened = flattenTune(parseTune(cleanAbc));
-    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot);
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
+    expect(overlay.lines[0].degrees).toEqual([['1'], ['2'], ['b3'], ['4']]);
+  });
+
+  it('applies a marker to the note it precedes even when whitespace separates the chord symbol from the marker', () => {
+    // The dominant real-world pattern (e.g. throughout JustInTime.ts) is
+    // `"D7" **D** GF`, with a literal space between the chord symbol's
+    // closing quote and the marker. A fixed-length offset from startChar
+    // undershoots the note in this case; scanning the cleaned ABC string
+    // (marker already blanked to whitespace) past the quote and any
+    // whitespace lands on the note correctly regardless of gap size.
+    const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\n"D-"**D** DEFG|\n');
+    const flattened = flattenTune(parseTune(cleanAbc));
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
     expect(overlay.lines[0].degrees).toEqual([['1'], ['2'], ['b3'], ['4']]);
   });
 });

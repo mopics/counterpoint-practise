@@ -52,15 +52,36 @@ export function pitchClassOf(pitch: NotationPitch, keyAccidentals: Record<string
  * duration) actually begins — as opposed to `event.startChar`, which abcjs
  * anchors at the start of a *preceding* chord-symbol annotation when one is
  * present (e.g. for `"D-"**D**D...`, the note's `startChar` points at the
- * opening `"` of `"D-"`, not at the note letter). Chord symbols are always
- * written as a quoted annotation (`"Chord"`) immediately before the note in
- * ABC source, so stepping past the quoted text (+2 for the two quote
- * characters) recovers the note's true onset. Without a chord symbol,
- * `startChar` already points at the note's own text.
+ * opening `"` of `"D-"`, not at the note letter). Empirically (verified
+ * against real transcription data, not just synthetic examples), abcjs can
+ * also include whitespace *before* that opening quote in `startChar` — e.g.
+ * immediately after a preceding bar line — so the quote is not always the
+ * very first character at `startChar`.
+ *
+ * This scans the *cleaned* ABC string (the one actually parsed, with `**K**`
+ * markers already blanked out to whitespace of equal length — see
+ * `keyMarkers.ts`) starting at `event.startChar`: skip any leading
+ * whitespace, then if the next character is a quote, skip past the matching
+ * closing quote of the chord-symbol annotation, then skip any further run of
+ * whitespace. Because a marker that sat between the chord symbol and the
+ * note has already been reduced to whitespace, the whitespace-skips
+ * naturally consume it regardless of how many literal spaces (zero or more)
+ * separated the marker from the chord symbol or from the note in the
+ * original source — unlike a fixed-length offset, which only worked for the
+ * zero-gap case. For events with no chord symbol, there is no quote to find,
+ * so this reduces to skipping any (typically absent) leading whitespace and
+ * returns `startChar` unchanged.
  */
-function noteOnsetChar(event: NotationEvent): number {
-  if (!event.chordSymbol) return event.startChar;
-  return event.startChar + event.chordSymbol.length + 2;
+function noteOnsetChar(event: NotationEvent, cleanAbc: string): number {
+  let pos = event.startChar;
+  while (pos < cleanAbc.length && /\s/.test(cleanAbc[pos])) pos++;
+  if (cleanAbc[pos] === '"') {
+    pos++;
+    while (pos < cleanAbc.length && cleanAbc[pos] !== '"') pos++;
+    pos++; // step past the closing quote
+    while (pos < cleanAbc.length && /\s/.test(cleanAbc[pos])) pos++;
+  }
+  return pos;
 }
 
 function pcDistance(rootPc: number, notePc: number): number {
@@ -87,6 +108,7 @@ export function computeScaleDegrees(
   flattened: FlattenedTune,
   markers: KeyMarker[],
   defaultRoot: string,
+  cleanAbc: string,
 ): ScaleDegreeOverlay {
   const sortedMarkers = [...markers].sort((a, b) => a.charOffset - b.charOffset);
   let markerIdx = 0;
@@ -106,7 +128,7 @@ export function computeScaleDegrees(
 
   for (const { lineIndex, eventIndex } of allRefs) {
     const event = flattened.lines[lineIndex].events[eventIndex];
-    const onsetChar = noteOnsetChar(event);
+    const onsetChar = noteOnsetChar(event, cleanAbc);
     while (markerIdx < sortedMarkers.length && sortedMarkers[markerIdx].charOffset <= onsetChar) {
       currentRootPc = ROOT_TO_PC[sortedMarkers[markerIdx].root] ?? currentRootPc;
       markerIdx++;
