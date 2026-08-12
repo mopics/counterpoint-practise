@@ -29,20 +29,47 @@ const DEGREE_LABEL_SHARP: Record<number, string> = {
   6: 'tt', 7: '5', 8: '#5', 9: '6', 10: '#6', 11: '7',
 };
 
+/**
+ * The bare pitch letter (A-G) a `NotationPitch.name` refers to. abcjs does
+ * NOT strip the ABC accidental prefix character from `name` when the note
+ * carries one — e.g. a note written `^G` in the source has `name: "^G"`,
+ * not `name: "G"` (confirmed empirically against the real library; this
+ * contradicts what abcjs's own shipped `NoteLetter` type implies). A lookup
+ * that assumed a bare letter would silently miss the table and fall back to
+ * pitch class 0 (C) for every explicitly-accidented note.
+ */
+function extractLetter(name: string): string {
+  return (name.match(/[A-Ga-g]/)?.[0] ?? 'C').toUpperCase();
+}
+
+/**
+ * Resolves the accidental that actually governs a note's sounding pitch:
+ * the note's own explicit accidental, if it has one; otherwise an
+ * accidental persisted from an earlier note with the same letter earlier in
+ * the same measure (ABC's measure-persistence rule — ended by the tune's
+ * key signature, but this map is caller-managed and cleared per measure,
+ * see `computeScaleDegrees`); otherwise the tune's key-signature-implied
+ * accidental for that letter; otherwise none (natural).
+ */
+function effectiveAccidental(
+  pitch: NotationPitch,
+  keyAccidentals: Record<string, AccidentalName>,
+  measureAccidentals?: Record<string, AccidentalName>,
+): AccidentalName | undefined {
+  const letter = extractLetter(pitch.name);
+  return pitch.accidental ?? measureAccidentals?.[letter] ?? keyAccidentals[letter];
+}
+
 /** Chromatic pitch class (0-11) of a note. `pitch.pitch` is a diatonic staff
  *  step, not chromatic, so this derives the real sounding pitch from the
- *  letter name plus the note's own accidental, falling back to the tune's
- *  key-signature-implied accidental for that letter when the note has none.
- *
- *  Known limitation: this only consults the note's own explicit accidental
- *  or the key signature — it does not track an accidental carried over from
- *  an earlier note earlier in the same measure (ABC's measure-persistence
- *  rule, e.g. `^FF F,|FF|` should sound the 2nd/3rd F sharp too). This is
- *  parity with the old app (not a regression) and out of scope here. */
-export function pitchClassOf(pitch: NotationPitch, keyAccidentals: Record<string, AccidentalName>): number {
-  const letter = pitch.name.toUpperCase();
-  const base = NOTE_LETTER_PC[letter] ?? 0;
-  const accidental = pitch.accidental ?? keyAccidentals[letter];
+ *  letter name plus its effective accidental (see `effectiveAccidental`). */
+export function pitchClassOf(
+  pitch: NotationPitch,
+  keyAccidentals: Record<string, AccidentalName>,
+  measureAccidentals?: Record<string, AccidentalName>,
+): number {
+  const base = NOTE_LETTER_PC[extractLetter(pitch.name)] ?? 0;
+  const accidental = effectiveAccidental(pitch, keyAccidentals, measureAccidentals);
   const offset = accidental ? (ACCIDENTAL_OFFSET[accidental] ?? 0) : 0;
   return ((base + offset) % 12 + 12) % 12;
 }
@@ -89,10 +116,17 @@ function pcDistance(rootPc: number, notePc: number): number {
 }
 
 /** Scale-degree label for a note relative to a root pitch class. Sharp
- *  spelling is used only when the note itself carries an explicit sharp. */
-export function degreeLabel(rootPc: number, pitch: NotationPitch, keyAccidentals: Record<string, AccidentalName>): string {
-  const dist = pcDistance(rootPc, pitchClassOf(pitch, keyAccidentals));
-  const table = pitch.accidental === 'sharp' ? DEGREE_LABEL_SHARP : DEGREE_LABEL_FLAT;
+ *  spelling is used when the note's effective accidental (see
+ *  `effectiveAccidental`) is sharp — its own explicit mark, or one it
+ *  inherited via measure-persistence. */
+export function degreeLabel(
+  rootPc: number,
+  pitch: NotationPitch,
+  keyAccidentals: Record<string, AccidentalName>,
+  measureAccidentals?: Record<string, AccidentalName>,
+): string {
+  const dist = pcDistance(rootPc, pitchClassOf(pitch, keyAccidentals, measureAccidentals));
+  const table = effectiveAccidental(pitch, keyAccidentals, measureAccidentals) === 'sharp' ? DEGREE_LABEL_SHARP : DEGREE_LABEL_FLAT;
   return table[dist] ?? '?';
 }
 
@@ -126,6 +160,15 @@ export function computeScaleDegrees(
     degrees: new Array<string[] | null>(line.events.length).fill(null),
   }));
 
+  // Accidentals persist for the rest of an ABC measure once written, per
+  // standard music notation rules. Keyed by bare letter, cleared whenever
+  // the walk crosses into a new measure (line+measureIndex pair, since
+  // `measureIndex` resets per rendered line — real content always breaks
+  // lines at bar lines, so this never falsely persists across a true
+  // measure boundary).
+  let measureKey = '';
+  let measureAccidentals: Record<string, AccidentalName> = {};
+
   for (const { lineIndex, eventIndex } of allRefs) {
     const event = flattened.lines[lineIndex].events[eventIndex];
     const onsetChar = noteOnsetChar(event, cleanAbc);
@@ -133,10 +176,20 @@ export function computeScaleDegrees(
       currentRootPc = ROOT_TO_PC[sortedMarkers[markerIdx].root] ?? currentRootPc;
       markerIdx++;
     }
+
+    const key = `${lineIndex}:${event.measureIndex}`;
+    if (key !== measureKey) {
+      measureKey = key;
+      measureAccidentals = {};
+    }
+
     if (event.kind !== 'note' || !event.pitches?.length) continue;
     linesOut[lineIndex].degrees[eventIndex] = event.pitches.map((p) =>
-      degreeLabel(currentRootPc, p, flattened.keyAccidentals),
+      degreeLabel(currentRootPc, p, flattened.keyAccidentals, measureAccidentals),
     );
+    for (const p of event.pitches) {
+      if (p.accidental) measureAccidentals[extractLetter(p.name)] = p.accidental;
+    }
   }
 
   return { lines: linesOut };
