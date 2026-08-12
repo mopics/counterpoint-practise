@@ -27,4 +27,10 @@ describe('UiStore', () => {
     uiStore.toggleNumeralMode();
     expect(localStorage.getItem('numeralMode')).toBe(String(uiStore.numeralMode));
   });
+
+  it('loads a persisted true value on module init', async () => {
+    localStorage.setItem('numeralMode', 'true');
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.numeralMode).toBe(true);
+  });
 });

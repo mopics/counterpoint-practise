@@ -1,7 +1,9 @@
+import type { AccidentalName } from 'abcjs';
+
 export interface NotationPitch {
   pitch: number;
   name: string;
-  accidental?: string;
+  accidental?: AccidentalName;
   verticalPos: number;
   tieStart: boolean;
   tieEnd: boolean;
@@ -58,7 +60,7 @@ export interface FlattenedTune {
   title: string;
   key: string;
   keyRoot: string;
-  keyAccidentals: Record<string, string>;
+  keyAccidentals: Record<string, AccidentalName>;
   meter: string;
   qpm: number;
 }

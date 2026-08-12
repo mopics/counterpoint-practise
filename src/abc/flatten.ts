@@ -8,7 +8,7 @@ import type { BarMarker, FlattenedTune, NotationEvent, NotationLine, NotationPit
 interface RawPitch {
   pitch: number;
   name: string;
-  accidental?: string;
+  accidental?: abcjs.AccidentalName;
   verticalPos: number;
   startTie?: unknown;
   endTie?: boolean;
@@ -135,7 +135,7 @@ export function flattenTune(tune: abcjs.TuneObject): FlattenedTune {
         ? 'C|'
         : meter.value?.map((v) => `${v.num}/${v.den}`).join(' ') ?? '';
 
-  const keyAccidentals: Record<string, string> = {};
+  const keyAccidentals: Record<string, abcjs.AccidentalName> = {};
   for (const a of key.accidentals ?? []) {
     keyAccidentals[a.note.toUpperCase()] = a.acc;
   }

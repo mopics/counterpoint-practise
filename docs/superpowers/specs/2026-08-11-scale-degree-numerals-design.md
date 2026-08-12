@@ -79,14 +79,13 @@ export const ROOT_TO_PC: Record<string, number> = {
 };
 ```
 
-## Rendering (`src/notation/NoteGlyph.tsx`, `src/notation/Staff.tsx`)
+## Rendering (`src/notation/NoteGlyph.tsx`, `src/notation/SheetView.tsx`)
 
 - `NoteGlyph` gains an optional prop `scaleDegrees?: string[]`, parallel to its existing `pitches` prop.
 - In the existing per-pitch render loop: if `scaleDegrees[i]` is present, render a small SVG `<text>` at `(x, pitchToY(p.pitch, staffBottomY))` with the label, in place of `<NoteHead>`, and skip `<AccidentalGlyph>` for that pitch (the degree label already encodes the accidental, e.g. `b3`, `#5`). If absent, render exactly as today (notehead + accidental).
 - Stems, beams, ledger lines, and ties/slurs are computed from `pitches`/`duration` independent of notehead-vs-numeral display, so they render unchanged in numeral mode — a beamed run of numerals still reads as one phrase.
-- `Staff.tsx` passes `degrees` from the `ScaleDegreeOverlay` (index-aligned with `line.events[]`) into each `NoteGlyph`, only when numeral mode is active.
 
-`SheetView.tsx`'s `parseSheet(abcSource)` gains the `extractKeyMarkers` + `computeScaleDegrees` calls, always computed (cheap; independent of the toggle) alongside `parseTune`/`flattenTune`. A new `numeralMode: boolean` prop is added to `SheetView`'s `Props`, following the existing pattern used for `cursor`/`selectionStart` (state lives in a MobX store, read by an `observer`-wrapped parent, passed down as a plain prop — `SheetView` itself stays a plain `React.memo`, not MobX-aware).
+`SheetView.tsx`'s `parseSheet(abcSource)` gains the `extractKeyMarkers` + `computeScaleDegrees` calls, always computed (cheap; independent of the toggle) alongside `parseTune`/`flattenTune`, and it is `SheetView.tsx` itself (not `Staff.tsx`, which this feature never touches) that passes the resulting `degrees` — index-aligned with `line.events[]` — into each `NoteGlyph`, only when numeral mode is active. A new `numeralMode: boolean` prop is added to `SheetView`'s `Props`, following the existing pattern used for `cursor`/`selectionStart` (state lives in a MobX store, read by an `observer`-wrapped parent, passed down as a plain prop — `SheetView` itself stays a plain `React.memo`, not MobX-aware).
 
 ## State and UI
 
@@ -113,4 +112,4 @@ Exported as a singleton from `src/stores/index.ts` alongside the existing three,
 
 ## Testing
 
-No existing test infrastructure covers `src/notation` or `src/abc` (no test runner configured in the old app either). Verification will be manual, using real content fixtures already ported from the old app that carry `**K**` markers, e.g. tunes matching `JustInTime`, `TuneUp`, `Anthropology` naming from the old app's asset set — confirm they exist under `src/content/**` in this repo and use them as manual test cases for dense marker sequences, single-marker-per-chord patterns, and the abutting-marker edge case.
+Vitest is now configured for this repo, and the pure-logic modules this feature adds — `src/abc/keyMarkers.ts` and `src/abc/scaleDegrees.ts` — have real unit tests covering marker extraction, pitch-class/degree-label resolution, and root-tracking across markers (including chord-symbol-adjacent markers). `src/notation` rendering (`NoteGlyph`'s numeral display) and `src/playback` remain manually verified, using real content fixtures already ported from the old app that carry `**K**` markers, e.g. tunes matching `JustInTime`, `TuneUp`, `Anthropology` naming from the old app's asset set — confirm they exist under `src/content/**` in this repo and use them as manual test cases for dense marker sequences, single-marker-per-chord patterns, and the abutting-marker edge case.
