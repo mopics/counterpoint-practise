@@ -166,7 +166,11 @@ export const SheetView = memo(function SheetView({
             <g key={ll.lineIndex}>
               <Staff topY={ll.staffTopY} width={ll.contentWidth} />
               {ll.partLabel && <PartLabel label={ll.partLabel} staffTopY={ll.staffTopY} />}
-              <ChordSymbolRow events={ll.events} y={ll.staffTopY - CHORD_ROW_HEIGHT / 2} />
+              <ChordSymbolRow
+                events={ll.events}
+                y={ll.staffTopY - CHORD_ROW_HEIGHT / 2}
+                rootHints={numeralMode ? scaleDegrees.lines[ll.lineIndex]?.rootHints : undefined}
+              />
               {ll.bars.map((b, i) => (
                 <BarLine key={i} bar={b} staffTopY={ll.staffTopY} />
               ))}
