@@ -176,8 +176,11 @@ export function computeScaleDegrees(
     const onsetChar = noteOnsetChar(event, cleanAbc);
     let lastConsumedRoot: string | null = null;
     while (markerIdx < sortedMarkers.length && sortedMarkers[markerIdx].charOffset <= onsetChar) {
-      currentRootPc = ROOT_TO_PC[sortedMarkers[markerIdx].root] ?? currentRootPc;
-      lastConsumedRoot = sortedMarkers[markerIdx].root;
+      const pc = ROOT_TO_PC[sortedMarkers[markerIdx].root];
+      if (pc !== undefined) {
+        currentRootPc = pc;
+        lastConsumedRoot = sortedMarkers[markerIdx].root;
+      }
       markerIdx++;
     }
     if (lastConsumedRoot !== null && event.chordSymbol) {

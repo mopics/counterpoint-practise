@@ -180,4 +180,28 @@ describe('computeScaleDegrees', () => {
     const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
     expect(overlay.lines[0].rootHints).toEqual([null, null, null, null]);
   });
+
+  it('does not record a hint or change the root for an unrecognized root spelling', () => {
+    const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\n"C"**C**CDEF|"Cb"**Cb**CDEF|\n');
+    const flattened = flattenTune(parseTune(cleanAbc));
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
+    // Second measure's root hint must NOT be recorded (Cb has no ROOT_TO_PC entry),
+    // and degrees must stay relative to C (the last root that actually applied).
+    expect(overlay.lines[0].rootHints).toEqual(['C', null, null, null, null, null, null, null]);
+    expect(overlay.lines[0].degrees).toEqual([['1'], ['2'], ['3'], ['4'], ['1'], ['2'], ['3'], ['4']]);
+  });
+
+  it('records a hint when the marker precedes the chord symbol', () => {
+    const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\n**C**"C7"CDEF|\n');
+    const flattened = flattenTune(parseTune(cleanAbc));
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
+    expect(overlay.lines[0].rootHints[0]).toBe('C');
+  });
+
+  it('records a hint on a rest event that carries a chord symbol', () => {
+    const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\n"C7"**C**z CDE|\n');
+    const flattened = flattenTune(parseTune(cleanAbc));
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
+    expect(overlay.lines[0].rootHints[0]).toBe('C');
+  });
 });
