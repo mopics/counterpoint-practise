@@ -132,6 +132,7 @@ export function degreeLabel(
 
 export interface ScaleDegreeLine {
   degrees: (string[] | null)[];
+  rootHints: (string | null)[];
 }
 
 export interface ScaleDegreeOverlay {
@@ -158,6 +159,7 @@ export function computeScaleDegrees(
 
   const linesOut: ScaleDegreeLine[] = flattened.lines.map((line) => ({
     degrees: new Array<string[] | null>(line.events.length).fill(null),
+    rootHints: new Array<string | null>(line.events.length).fill(null),
   }));
 
   // Accidentals persist for the rest of an ABC measure once written, per
@@ -172,9 +174,14 @@ export function computeScaleDegrees(
   for (const { lineIndex, eventIndex } of allRefs) {
     const event = flattened.lines[lineIndex].events[eventIndex];
     const onsetChar = noteOnsetChar(event, cleanAbc);
+    let lastConsumedRoot: string | null = null;
     while (markerIdx < sortedMarkers.length && sortedMarkers[markerIdx].charOffset <= onsetChar) {
       currentRootPc = ROOT_TO_PC[sortedMarkers[markerIdx].root] ?? currentRootPc;
+      lastConsumedRoot = sortedMarkers[markerIdx].root;
       markerIdx++;
+    }
+    if (lastConsumedRoot !== null && event.chordSymbol) {
+      linesOut[lineIndex].rootHints[eventIndex] = lastConsumedRoot;
     }
 
     const key = `${lineIndex}:${event.measureIndex}`;

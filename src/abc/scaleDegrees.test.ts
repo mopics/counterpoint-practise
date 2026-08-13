@@ -162,4 +162,22 @@ describe('computeScaleDegrees', () => {
     // Measure 2 (after the bar line): bare C resets to natural ("1").
     expect(overlay.lines[0].degrees).toEqual([['#1'], ['#1'], ['1'], ['1']]);
   });
+
+  it('records a root hint on the event where a marker fires, if it carries a chord symbol', () => {
+    const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\n"D-"**D**DEFG "G7"AB "C"**C**CD|\n');
+    const flattened = flattenTune(parseTune(cleanAbc));
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
+    expect(overlay.lines[0].rootHints).toEqual([
+      'D', null, null, null, // "D-"**D** D E F G
+      null, null,             // "G7" A B  (no marker here — no hint)
+      'C', null,               // "C"**C** C D
+    ]);
+  });
+
+  it('does not record a hint when a marker fires with no adjacent chord symbol', () => {
+    const { cleanAbc, markers } = extractKeyMarkers('X:1\nK:C\nCD**F**EF|\n');
+    const flattened = flattenTune(parseTune(cleanAbc));
+    const overlay = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
+    expect(overlay.lines[0].rootHints).toEqual([null, null, null, null]);
+  });
 });
