@@ -33,4 +33,28 @@ describe('UiStore', () => {
     const { default: uiStore } = await import('./UiStore');
     expect(uiStore.numeralMode).toBe(true);
   });
+
+  it('defaults videoPanelExpanded to true when nothing is persisted', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.videoPanelExpanded).toBe(true);
+  });
+
+  it('toggleVideoPanelExpanded flips the value', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    const initial = uiStore.videoPanelExpanded;
+    uiStore.toggleVideoPanelExpanded();
+    expect(uiStore.videoPanelExpanded).toBe(!initial);
+  });
+
+  it('persists the toggled videoPanelExpanded value to localStorage', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.toggleVideoPanelExpanded();
+    expect(localStorage.getItem('videoPanelExpanded')).toBe(String(uiStore.videoPanelExpanded));
+  });
+
+  it('loads a persisted false videoPanelExpanded value on module init', async () => {
+    localStorage.setItem('videoPanelExpanded', 'false');
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.videoPanelExpanded).toBe(false);
+  });
 });
