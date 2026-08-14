@@ -26,6 +26,7 @@ declare global {
       seekTo(seconds: number, allowSeekAhead: boolean): void;
       getCurrentTime(): number;
       loadVideoById(videoId: string): void;
+      cueVideoById(videoId: string): void;
       destroy(): void;
     }
   }

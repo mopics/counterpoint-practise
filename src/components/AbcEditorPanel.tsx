@@ -35,7 +35,7 @@ export function AbcEditorPanel({ entry, value, edited, onChange, onReset }: Prop
         spellCheck={false}
         className="min-h-0 flex-1 resize-none p-3 font-mono text-sm text-slate-800 outline-none"
       />
-      <VideoLoopPanel entry={entry} />
+      <VideoLoopPanel key={entry.key ?? entry.id} entry={entry} />
     </div>
   );
 }
