@@ -112,5 +112,9 @@ export const YouTubePlayer = forwardRef<YouTubePlayerHandle, Props>(function You
     playerRef.current?.loadVideoById(videoId);
   }, [videoId]);
 
-  return <div ref={containerRef} className="aspect-video w-full" />;
+  return (
+    <div className="aspect-video w-full">
+      <div ref={containerRef} className="h-full w-full" />
+    </div>
+  );
 });
