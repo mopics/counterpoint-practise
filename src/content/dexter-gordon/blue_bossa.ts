@@ -34,8 +34,8 @@ export const DG_BLUE_BOSSA__II_V = {
     title: "Blue Bossa - Dexter Gordon - II-Vs",
     video: {
         url: "https://www.youtube.com/watch?v=zdR7v0WbZbA&list=RDzdR7v0WbZbA&start_radio=1",
-        start: "0:14",
-        end: "0:24"
+        start: "0:54",
+        end: "1:19"
     },
     key: "Eb",
     data: `X:1
