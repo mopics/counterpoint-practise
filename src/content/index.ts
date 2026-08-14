@@ -12,7 +12,7 @@ import { CB_TUNE_UP } from "./chetbaker/TuneUp";
 import { _101_BEBOP_II_V7 } from "./david-baker/_101-bebop-II-V7";
 import { _DB_CHR_LYDIAN_EXE } from "./david-baker/_db_chr_lydian_exe";
 import { _DB_CHR_LYDIAN_SCALES } from "./david-baker/_db_chr_lydian_scales";
-import { DG_BLUE_BOSSA, DG_BLUE_BOSSA__II_V } from "./dexter-gordon/blue_bossa";
+import { DG_BLUE_BOSSA, DG_BLUE_BOSSA__II_V, BH_BLUE_BOSSA__IMPROVE_PRACTICE } from "./dexter-gordon/blue_bossa";
 import { _13_Saints } from "./jazz-method-for-trumpet/_13_Saints";
 import { _14_A_little_Rif } from "./jazz-method-for-trumpet/_14_Little_Rif";
 import { _16_Samba_4_Maya } from "./jazz-method-for-trumpet/_16_Samba_4_Maya";
@@ -58,6 +58,7 @@ export interface AbcData {
     key?: string;
     value?: string;
     data?: string;
+    video?: { url: string; start: string; end: string };
 }
 
 export const FILE_TREE: AbcData[] = [
@@ -176,7 +177,8 @@ export const FILE_TREE: AbcData[] = [
             {
                 id: "dexter-gordon", title: "Dexter Gordon", children: [
                     DG_BLUE_BOSSA as AbcData,
-                    DG_BLUE_BOSSA__II_V as AbcData
+                    DG_BLUE_BOSSA__II_V as AbcData,
+                    BH_BLUE_BOSSA__IMPROVE_PRACTICE as AbcData
                 ]
             },
             {

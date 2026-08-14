@@ -92,4 +92,62 @@ describe('VideoLoopStore', () => {
     expect(raw['display-key']).toBeDefined();
     expect(raw['internal-id']).toBeUndefined();
   });
+
+  it('falls back to the abc-object video field when nothing is saved yet', async () => {
+    const { default: videoLoopStore } = await import('./VideoLoopStore');
+    const entryWithVideo: AbcData = {
+      id: 'tune-with-video',
+      title: 'Tune With Video',
+      video: { url: 'https://youtu.be/abc12345678', start: '0:14', end: '0:24' },
+    };
+    expect(videoLoopStore.entryFor(entryWithVideo)).toEqual({
+      url: 'https://youtu.be/abc12345678',
+      loopStart: 14,
+      loopEnd: 24,
+      loopEnabled: false,
+    });
+  });
+
+  it('does not persist the abc-object video fallback to localStorage', async () => {
+    const { default: videoLoopStore } = await import('./VideoLoopStore');
+    const entryWithVideo: AbcData = {
+      id: 'tune-with-video',
+      title: 'Tune With Video',
+      video: { url: 'https://youtu.be/abc12345678', start: '0:14', end: '0:24' },
+    };
+    videoLoopStore.entryFor(entryWithVideo);
+    expect(localStorage.getItem('videoLoopEntries')).toBeNull();
+  });
+
+  it('persists an edit to one field, keeping the abc-object video field as the starting point for the rest', async () => {
+    const { default: videoLoopStore } = await import('./VideoLoopStore');
+    const entryWithVideo: AbcData = {
+      id: 'tune-with-video',
+      title: 'Tune With Video',
+      video: { url: 'https://youtu.be/abc12345678', start: '0:14', end: '0:24' },
+    };
+    videoLoopStore.setUrl(entryWithVideo, 'https://youtu.be/differentVideo1');
+    expect(videoLoopStore.entryFor(entryWithVideo)).toEqual({
+      url: 'https://youtu.be/differentVideo1',
+      loopStart: 14,
+      loopEnd: 24,
+      loopEnabled: false,
+    });
+  });
+
+  it('a persisted loop-time edit overrides the abc-object video field for that field specifically', async () => {
+    const { default: videoLoopStore } = await import('./VideoLoopStore');
+    const entryWithVideo: AbcData = {
+      id: 'tune-with-video',
+      title: 'Tune With Video',
+      video: { url: 'https://youtu.be/abc12345678', start: '0:14', end: '0:24' },
+    };
+    videoLoopStore.setLoopStart(entryWithVideo, 30);
+    expect(videoLoopStore.entryFor(entryWithVideo)).toEqual({
+      url: 'https://youtu.be/abc12345678',
+      loopStart: 30,
+      loopEnd: 24,
+      loopEnabled: false,
+    });
+  });
 });

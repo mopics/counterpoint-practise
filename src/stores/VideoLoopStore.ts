@@ -1,5 +1,6 @@
 import { actionBound, makeObservable, observable, runInAction } from 'mobx';
 import type { AbcData } from '../content';
+import { parseTimeInput } from '../video/timeFormat';
 
 const STORAGE_KEY = 'videoLoopEntries';
 
@@ -12,6 +13,23 @@ export interface VideoLoopEntry {
 
 function defaultEntry(): VideoLoopEntry {
   return { url: '', loopStart: null, loopEnd: null, loopEnabled: false };
+}
+
+/**
+ * Fallback used only when nothing has been saved for this tune yet — mirrors
+ * EditorStore's original-text fallback. An abc-object's `video` field (e.g.
+ * `{ url, start: "0:14", end: "0:24" }`) seeds the panel until the user
+ * makes their own edit, at which point the persisted edit takes over and
+ * this fallback is never consulted again for that tune.
+ */
+function defaultFromAbcData(entry: AbcData): VideoLoopEntry {
+  if (!entry.video) return defaultEntry();
+  return {
+    url: entry.video.url,
+    loopStart: parseTimeInput(entry.video.start),
+    loopEnd: parseTimeInput(entry.video.end),
+    loopEnabled: false,
+  };
 }
 
 function keyFor(entry: AbcData): string {
@@ -41,7 +59,7 @@ class VideoLoopStore {
   }
 
   entryFor(entry: AbcData): VideoLoopEntry {
-    return this.entries.get(keyFor(entry)) ?? defaultEntry();
+    return this.entries.get(keyFor(entry)) ?? defaultFromAbcData(entry);
   }
 
   setUrl(entry: AbcData, url: string): void {

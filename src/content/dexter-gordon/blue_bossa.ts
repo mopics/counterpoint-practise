@@ -32,6 +32,11 @@ T:3
 export const DG_BLUE_BOSSA__II_V = {
     id: "Blue-Bossa-dexter-gordon-ii-v",
     title: "Blue Bossa - Dexter Gordon - II-Vs",
+    video: {
+        url: "https://www.youtube.com/watch?v=zdR7v0WbZbA&list=RDzdR7v0WbZbA&start_radio=1",
+        start: "0:14",
+        end: "0:24"
+    },
     key: "Eb",
     data: `X:1
 T: Blue Bossa - II-Vs
@@ -47,3 +52,19 @@ w: regular . minor . . . . . .  Melodic . Minor
 w: . . . . . . . . Harmonic . Minor
 `
 };
+
+export const BH_BLUE_BOSSA__IMPROVE_PRACTICE = {
+    id: "Blue-Bossa-barry-harris-scale-practice",
+    title: "Blue Bossa - Barry Harris - Scale Chord Practize",
+    key: "Eb",
+    data: `X:1
+K: Eb
+Q: 72
+"C-7" **C** CDEF G=ABc | B=AGF EDC2 |
+"F-7" **F** FGAB cdef | **C** "Bb7" Bcde fgab  |
+"D-7b5" DEFG ABcd | "G7" GA=Bc defg |
+"C-7" CDEF G=ABc | "D-7b5" DEFG-"G7" GA=Bc |
+"Eb-7" **Eb** _EF_G_A _Bc_d_e | "Ab7" **Ab** _A_Bc_d _ef_g_a |
+"Db^" **Db** _D_EF_G _A_Bc_d | c_B_A_G F_E_D2 |
+    `
+}
