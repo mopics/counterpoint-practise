@@ -28,6 +28,7 @@ const App = observer(function App() {
           }
           right={
             <AbcEditorPanel
+              entry={selected}
               value={editorStore.textFor(selected)}
               edited={editorStore.isEdited(selected)}
               onChange={(text) => editorStore.setText(selected, text)}
