@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { writePrintPayload, readPrintPayload } from './printHandoff';
 
 describe('printHandoff', () => {
@@ -29,5 +29,21 @@ describe('printHandoff', () => {
     writePrintPayload('X:1\nK:C\nC|\n', 'First');
     writePrintPayload('X:1\nK:C\nD|\n', 'Second');
     expect(readPrintPayload()).toEqual({ abc: 'X:1\nK:C\nD|\n', title: 'Second' });
+  });
+
+  it('writePrintPayload does not throw when localStorage.setItem throws', () => {
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('quota exceeded');
+    });
+    expect(() => writePrintPayload('X:1\nK:C\nC|\n', 'Some Tune')).not.toThrow();
+    setItemSpy.mockRestore();
+  });
+
+  it('readPrintPayload returns null when localStorage.getItem throws', () => {
+    const getItemSpy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('storage disabled');
+    });
+    expect(readPrintPayload()).toBeNull();
+    getItemSpy.mockRestore();
   });
 });

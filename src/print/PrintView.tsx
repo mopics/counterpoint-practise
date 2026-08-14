@@ -13,7 +13,7 @@ export function PrintView() {
     let cancelled = false;
     document.title = payload.title;
     const { cleanAbc } = extractKeyMarkers(payload.abc);
-    abcjs.renderAbc(containerRef.current, cleanAbc);
+    abcjs.renderAbc(containerRef.current, cleanAbc, { staffwidth: 680 });
 
     // Defer window.print() a frame so the browser has painted the rendered
     // notation first — calling it synchronously right after renderAbc risks
@@ -36,5 +36,5 @@ export function PrintView() {
     );
   }
 
-  return <div ref={containerRef} className="p-8" />;
+  return <div ref={containerRef} className="p-8 print:p-0" />;
 }
