@@ -1,7 +1,12 @@
 import { actionBound, makeObservable, observable, runInAction } from 'mobx';
 import type { AbcData } from '../content';
+import { deleteOverride, saveOverride, saveTune } from '../api/tunesClient';
+import libraryStore from './LibraryStore';
 
 const COMMIT_DEBOUNCE_MS = 400;
+const MY_TUNES_PREFIX = 'lib/my-tunes/';
+
+export type SaveStatus = 'saving' | 'saved' | 'error';
 
 function keyFor(entry: AbcData): string {
   return entry.key ?? entry.id;
@@ -20,10 +25,14 @@ class EditorStore {
   private committed = observable.map<string, string>();
   private commitDebounce = new Map<string, ReturnType<typeof setTimeout>>();
 
+  saveStatus = observable.map<string, SaveStatus>();
+  saveError = observable.map<string, string>();
+
   constructor() {
     makeObservable(this, {
       setText: actionBound,
       resetText: actionBound,
+      save: actionBound,
     });
   }
 
@@ -46,6 +55,9 @@ class EditorStore {
     const original = entry.data ?? '';
     if (text === original) this.edits.delete(key);
     else this.edits.set(key, text);
+    // A fresh edit invalidates whatever the last save/error indicator said.
+    this.saveStatus.delete(key);
+    this.saveError.delete(key);
 
     const existingTimer = this.commitDebounce.get(key);
     if (existingTimer) clearTimeout(existingTimer);
@@ -54,10 +66,52 @@ class EditorStore {
     }, COMMIT_DEBOUNCE_MS));
   }
 
-  resetText(entry: AbcData): void {
+  /** Clears in-progress edit state. Reverting a *saved* override also asks the server to drop it. */
+  async resetText(entry: AbcData): Promise<void> {
     const key = keyFor(entry);
+    this.clearLocalEdit(key);
+    if (libraryStore.hasOverride(key)) {
+      const ok = await deleteOverride(key);
+      if (ok) runInAction(() => libraryStore.removeOverride(key));
+    }
+  }
+
+  /** Persists the current text as a new tune or an override of an existing one. */
+  async save(entry: AbcData): Promise<void> {
+    const key = keyFor(entry);
+    this.saveStatus.set(key, 'saving');
+    this.saveError.delete(key);
+    // textFor(), not currentAbcSource(): the latter lags behind the live edit by
+    // up to the 400ms commit debounce, so saving right after typing could persist stale text.
+    const input = { title: entry.title, data: this.textFor(entry), video: entry.video };
+
+    if (key.startsWith(MY_TUNES_PREFIX)) {
+      const record = await saveTune(key, input);
+      this.finishSave(key, record, (r) => libraryStore.applyNewTune(r));
+      return;
+    }
+    const record = await saveOverride(key, input);
+    this.finishSave(key, record, (r) => libraryStore.applyOverride(r));
+  }
+
+  private finishSave<T>(key: string, record: T | null, apply: (record: T) => void): void {
+    runInAction(() => {
+      if (!record) {
+        this.saveStatus.set(key, 'error');
+        this.saveError.set(key, 'Could not reach the server — your edit is still here, try again.');
+        return;
+      }
+      apply(record);
+      this.clearLocalEdit(key);
+      this.saveStatus.set(key, 'saved');
+    });
+  }
+
+  private clearLocalEdit(key: string): void {
     this.edits.delete(key);
     this.committed.delete(key);
+    this.saveStatus.delete(key);
+    this.saveError.delete(key);
     const existingTimer = this.commitDebounce.get(key);
     if (existingTimer) {
       clearTimeout(existingTimer);

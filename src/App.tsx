@@ -31,8 +31,12 @@ const App = observer(function App() {
               entry={selected}
               value={editorStore.textFor(selected)}
               edited={editorStore.isEdited(selected)}
+              hasOverride={libraryStore.hasOverride(selected.key)}
+              saveStatus={editorStore.saveStatus.get(selected.key ?? selected.id)}
+              saveError={editorStore.saveError.get(selected.key ?? selected.id)}
               onChange={(text) => editorStore.setText(selected, text)}
               onReset={() => editorStore.resetText(selected)}
+              onSave={() => editorStore.save(selected)}
             />
           }
         />

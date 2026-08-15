@@ -14,8 +14,28 @@ npm install
 npm run dev
 ```
 
+## Persisting tunes (optional local server)
+
+By default new tunes still have to be added by hand under `src/content/**`. Running the
+persistence server lets you add and edit tunes from the browser instead — new tunes and
+edits to existing ones are saved as JSON files under `server/data/`, without touching the
+original `.ts` content files.
+
+In a second terminal, alongside `npm run dev`:
+
+```bash
+npm run server
+```
+
+This starts a local API on `http://localhost:3001`, which Vite proxies at `/api`. It's a
+personal local tool — localhost only, no authentication. If the server isn't running, the
+app falls back to the static content in `src/content/**` as usual.
+
 ## Build
 
 ```bash
 npm run build
 ```
+
+To use the persistence server against a production build, run `npm run server` alongside
+`npm run preview` (both proxy configs point at `http://localhost:3001`).
