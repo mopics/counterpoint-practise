@@ -1,149 +1,190 @@
-import { actionBound, makeObservable, observableRef, runInAction } from 'mobx';
-import { FILE_TREE, type AbcData } from '../content';
-import { fetchTunes, type OverrideRecord, type TuneRecord } from '../api/tunesClient';
+import { actionBound, makeObservable, observable, observableRef, runInAction } from 'mobx';
+import {
+  createFolder as apiCreateFolder,
+  createTune as apiCreateTune,
+  deleteFolder as apiDeleteFolder,
+  deleteTune as apiDeleteTune,
+  fetchLibrary,
+  renameFolder as apiRenameFolder,
+  saveTune as apiSaveTune,
+  type FolderRecord,
+  type LibraryNode,
+  type TuneRecord,
+} from '../api/tunesClient';
 
-const MY_TUNES_ID = 'my-tunes';
-
-// Sibling `id`s are occasionally duplicated in the source content (e.g. two
-// unrelated "Cherokee" entries under Tunes both use id "cherokee") — dedupe
-// with a numeric suffix so every key stays unique and stable across reloads.
-function assignKeys(nodes: AbcData[], prefix: string): void {
-  const seen = new Map<string, number>();
-  for (const node of nodes) {
-    const base = `${prefix}/${node.id}`;
-    const count = seen.get(base) ?? 0;
-    seen.set(base, count + 1);
-    node.key = count === 0 ? base : `${base}-${count}`;
-    if (node.children) assignKeys(node.children, node.key);
-  }
+function isFolder(node: LibraryNode): node is FolderRecord {
+  return node.type === 'folder';
 }
 
-function firstLeaf(nodes: AbcData[]): AbcData | undefined {
-  for (const node of nodes) {
-    if (!node.children) return node;
-    const leaf = firstLeaf(node.children);
-    if (leaf) return leaf;
+function byTitle(a: LibraryNode, b: LibraryNode): number {
+  return a.title.localeCompare(b.title);
+}
+
+function firstTuneDepthFirst(parentId: string | null, byParent: Map<string | null, LibraryNode[]>): TuneRecord | undefined {
+  const siblings = [...(byParent.get(parentId) ?? [])].sort(byTitle);
+  for (const node of siblings) {
+    if (!isFolder(node)) return node;
+    const found = firstTuneDepthFirst(node.id, byParent);
+    if (found) return found;
   }
   return undefined;
 }
 
-/** Applies overrides to static nodes, cloning only the nodes an override actually touches. */
-function applyOverrides(nodes: AbcData[], overridesByKey: Map<string, OverrideRecord>): AbcData[] {
-  let changed = false;
-  const result = nodes.map((node) => {
-    if (node.children) {
-      const children = applyOverrides(node.children, overridesByKey);
-      if (children === node.children) return node;
-      changed = true;
-      return { ...node, children };
-    }
-    const override = node.key ? overridesByKey.get(node.key) : undefined;
-    if (!override) return node;
-    changed = true;
-    return { ...node, title: override.title, data: override.data, video: override.video };
-  });
-  return changed ? result : nodes;
-}
-
-function tuneRecordToNode(tune: TuneRecord): AbcData {
-  return { id: tune.id, title: tune.title, data: tune.data, video: tune.video };
-}
-
 class LibraryStore {
-  tree: AbcData[] = FILE_TREE;
-  // Assigned in rebuildTree(), called from the constructor — TS can't see
-  // through that indirection for definite-assignment analysis.
-  selected!: AbcData;
+  currentFolderId: string | null = null;
+  selected: TuneRecord | undefined = undefined;
+  loaded = false;
+  loadError = false;
 
-  private overridesByKey = new Map<string, OverrideRecord>();
-  private newTunes: TuneRecord[] = [];
+  private nodesById = new Map<string, LibraryNode>();
+  private childrenByParent = new Map<string | null, LibraryNode[]>();
 
   constructor() {
     makeObservable(this, {
-      tree: observableRef,
+      currentFolderId: observable,
       selected: observableRef,
+      loaded: observable,
+      loadError: observable,
+      navigateTo: actionBound,
       setSelected: actionBound,
-      applyOverride: actionBound,
-      removeOverride: actionBound,
-      applyNewTune: actionBound,
-      removeTune: actionBound,
+      createFolder: actionBound,
+      createTune: actionBound,
+      rename: actionBound,
+      remove: actionBound,
+      applyTuneEdit: actionBound,
     });
 
-    this.rebuildTree();
-    void this.loadFromServer();
+    void this.load();
   }
 
-  private rebuildTree(): void {
-    // Static keys must exist before override lookup, and stay stable across
-    // rebuilds since FILE_TREE's structure/order never changes at runtime.
-    assignKeys(FILE_TREE, 'lib');
-    const patchedStatic = applyOverrides(FILE_TREE, this.overridesByKey);
-
-    const combined =
-      this.newTunes.length > 0
-        ? [...patchedStatic, { id: MY_TUNES_ID, title: 'My Tunes', children: this.newTunes.map(tuneRecordToNode) }]
-        : patchedStatic;
-
-    assignKeys(combined, 'lib');
-    this.tree = combined;
-
-    const previousKey = this.selected?.key;
-    const previous = previousKey ? this.findByKey(previousKey) : undefined;
-    this.selected = previous ?? firstLeaf(this.tree) ?? this.tree[0];
-  }
-
-  private async loadFromServer(): Promise<void> {
-    const listing = await fetchTunes();
-    if (!listing) return; // static tree already rendered — no server, no problem
+  private async load(): Promise<void> {
+    const listing = await fetchLibrary();
     runInAction(() => {
-      this.overridesByKey = new Map(listing.overrides.map((o) => [o.key, o]));
-      this.newTunes = listing.tunes;
-      this.rebuildTree();
+      if (!listing) {
+        this.loadError = true;
+        return;
+      }
+      this.loadError = false;
+      this.loaded = true;
+      this.rebuildIndexes(listing.nodes);
+      const first = firstTuneDepthFirst(null, this.childrenByParent);
+      this.selected = first;
+      this.currentFolderId = first ? first.parentId : null;
     });
   }
 
-  setSelected(entry: AbcData): void {
-    if (!entry.children) this.selected = entry;
+  private rebuildIndexes(nodes: LibraryNode[]): void {
+    this.nodesById = new Map(nodes.map((n) => [n.id, n]));
+    this.childrenByParent = new Map();
+    for (const node of nodes) {
+      const siblings = this.childrenByParent.get(node.parentId) ?? [];
+      siblings.push(node);
+      this.childrenByParent.set(node.parentId, siblings);
+    }
   }
 
-  findByKey(key: string): AbcData | undefined {
-    const search = (nodes: AbcData[]): AbcData | undefined => {
-      for (const node of nodes) {
-        if (node.key === key) return node;
-        if (node.children) {
-          const found = search(node.children);
-          if (found) return found;
-        }
-      }
-      return undefined;
-    };
-    return search(this.tree);
+  childrenOf(folderId: string | null): LibraryNode[] {
+    return [...(this.childrenByParent.get(folderId) ?? [])].sort((a, b) => {
+      if (isFolder(a) !== isFolder(b)) return isFolder(a) ? -1 : 1;
+      return byTitle(a, b);
+    });
   }
 
-  hasOverride(key: string | undefined): boolean {
-    return !!key && this.overridesByKey.has(key);
+  get breadcrumb(): FolderRecord[] {
+    const trail: FolderRecord[] = [];
+    let current = this.currentFolderId;
+    while (current) {
+      const node = this.nodesById.get(current);
+      if (!node || !isFolder(node)) break;
+      trail.unshift(node);
+      current = node.parentId;
+    }
+    return trail;
   }
 
-  applyOverride(record: OverrideRecord): void {
-    this.overridesByKey.set(record.key, record);
-    this.rebuildTree();
+  navigateTo(folderId: string | null): void {
+    this.currentFolderId = folderId;
   }
 
-  removeOverride(key: string): void {
-    this.overridesByKey.delete(key);
-    this.rebuildTree();
+  setSelected(tune: TuneRecord): void {
+    this.selected = tune;
+    this.currentFolderId = tune.parentId;
   }
 
-  applyNewTune(record: TuneRecord): void {
-    const existingIndex = this.newTunes.findIndex((t) => t.key === record.key);
-    if (existingIndex === -1) this.newTunes = [...this.newTunes, record];
-    else this.newTunes = this.newTunes.map((t, i) => (i === existingIndex ? record : t));
-    this.rebuildTree();
+  async createFolder(title: string): Promise<void> {
+    const record = await apiCreateFolder({ parentId: this.currentFolderId, title });
+    if (!record) return;
+    runInAction(() => this.insertNode(record));
   }
 
-  removeTune(key: string): void {
-    this.newTunes = this.newTunes.filter((t) => t.key !== key);
-    this.rebuildTree();
+  async createTune(title: string): Promise<TuneRecord | null> {
+    const record = await apiCreateTune({ parentId: this.currentFolderId, title, data: '' });
+    if (!record) return null;
+    runInAction(() => {
+      this.insertNode(record);
+      this.setSelected(record);
+    });
+    return record;
+  }
+
+  async rename(id: string, title: string): Promise<void> {
+    const node = this.nodesById.get(id);
+    if (!node) return;
+    const record = isFolder(node)
+      ? await apiRenameFolder(id, { title })
+      : await apiSaveTune(id, { title, data: node.data, video: node.video });
+    if (!record) return;
+    runInAction(() => this.replaceNode(record));
+  }
+
+  async remove(id: string): Promise<'deleted' | 'not-empty' | 'error'> {
+    const node = this.nodesById.get(id);
+    if (!node) return 'error';
+
+    if (isFolder(node)) {
+      const result = await apiDeleteFolder(id);
+      if (result === 'deleted') runInAction(() => this.removeNode(node));
+      return result;
+    }
+    const ok = await apiDeleteTune(id);
+    if (!ok) return 'error';
+    runInAction(() => this.removeNode(node));
+    return 'deleted';
+  }
+
+  applyTuneEdit(record: TuneRecord): void {
+    this.replaceNode(record);
+  }
+
+  private insertNode(node: LibraryNode): void {
+    this.nodesById.set(node.id, node);
+    const siblings = this.childrenByParent.get(node.parentId) ?? [];
+    this.childrenByParent.set(node.parentId, [...siblings, node]);
+  }
+
+  private replaceNode(node: LibraryNode): void {
+    this.nodesById.set(node.id, node);
+    const siblings = this.childrenByParent.get(node.parentId) ?? [];
+    const index = siblings.findIndex((n) => n.id === node.id);
+    this.childrenByParent.set(
+      node.parentId,
+      index === -1 ? [...siblings, node] : siblings.map((n, i) => (i === index ? node : n)),
+    );
+    if (this.selected?.id === node.id && node.type === 'tune') this.selected = node;
+  }
+
+  private removeNode(node: LibraryNode): void {
+    this.nodesById.delete(node.id);
+    const siblings = this.childrenByParent.get(node.parentId) ?? [];
+    this.childrenByParent.set(node.parentId, siblings.filter((n) => n.id !== node.id));
+
+    if (this.currentFolderId === node.id) this.currentFolderId = node.parentId;
+
+    if (this.selected?.id === node.id) {
+      const replacement = firstTuneDepthFirst(null, this.childrenByParent);
+      this.selected = replacement;
+      if (replacement) this.currentFolderId = replacement.parentId;
+    }
   }
 }
 
