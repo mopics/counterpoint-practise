@@ -3,5 +3,6 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.server.tsbuildinfo"
   },
-  "include": ["server"]
+  "include": ["server"],
+  "exclude": ["server/migrate.ts", "server/migrate.test.ts"]
 }
