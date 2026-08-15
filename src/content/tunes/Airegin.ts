@@ -3,8 +3,8 @@ export const AIREGIN = {
     title: "Airegin",
     video: {
         url: "https://www.youtube.com/watch?v=v7PU7e6ZJe4&list=RDv7PU7e6ZJe4&start_radio=1",
-        start: '0:00',
-        end: '12:00'
+        start: '0:09',
+        end: '0:46'
     },
     key: "Ab",
     data: `X:1

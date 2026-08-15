@@ -17,6 +17,7 @@ import { _13_Saints } from "./jazz-method-for-trumpet/_13_Saints";
 import { _14_A_little_Rif } from "./jazz-method-for-trumpet/_14_Little_Rif";
 import { _16_Samba_4_Maya } from "./jazz-method-for-trumpet/_16_Samba_4_Maya";
 import { _JL_BORING_TRIAD_EXERCISE } from "./jens-larsen/BoringTriadExersize";
+import { JL_COLTRANE_PATTERNS } from "./jens-larsen/ColtranePatterns";
 import { _5_Licks_That_Explain_Most_of_Bebop } from "./jens-larsen/FiveLicksThatExplainMostOfBebop";
 import { ESSENTIAL_JAZZ_LICKS_1_5 } from "./jerry-coker/improvisers-reference/essential-jazz-licks-1-5";
 import { ESSENTIAL_JAZZ_LICKS_11_15 } from "./jerry-coker/improvisers-reference/essential-jazz-licks-11-15";
@@ -121,7 +122,8 @@ export const FILE_TREE: AbcData[] = [
     {
         id: "jens-larsen", title: "Jens Larsen", children: [
             _5_Licks_That_Explain_Most_of_Bebop as AbcData,
-            _JL_BORING_TRIAD_EXERCISE as AbcData
+            _JL_BORING_TRIAD_EXERCISE as AbcData,
+            JL_COLTRANE_PATTERNS as AbcData
         ]
     },
     {
