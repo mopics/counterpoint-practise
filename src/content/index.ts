@@ -39,6 +39,7 @@ import { VIERD_BLUES_PRESTIGE_7847 } from "./sonny-rollins/VeirdBlues";
 import { VIERD_BLUES_PATTERNS } from "./sonny-rollins/VierdBlues-patterns";
 import { SG_BODY_AND_SOUL } from "./stan-getz/BodyAndSoul";
 import { AFTERNOON_IN_PARIS } from "./tunes/AfternoonInParis";
+import { AIREGIN } from "./tunes/Airegin";
 import { ALL_OF_ME } from "./tunes/AllOfMe";
 import { ALL_THE_THINGS_YOU_ARE } from "./tunes/AllTheThingsYouAre";
 import { ANTHROPOLOGY } from "./tunes/Anthropology";
@@ -201,6 +202,7 @@ export const FILE_TREE: AbcData[] = [
     {
         id: 'tunes', title: 'Tunes', children: [
             AFTERNOON_IN_PARIS as AbcData,
+            AIREGIN as AbcData,
             ALL_THE_THINGS_YOU_ARE as AbcData,
             ALL_OF_ME as AbcData,
             ANTHROPOLOGY as AbcData,
