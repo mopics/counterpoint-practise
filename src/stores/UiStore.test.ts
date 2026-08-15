@@ -57,4 +57,75 @@ describe('UiStore', () => {
     const { default: uiStore } = await import('./UiStore');
     expect(uiStore.videoPanelExpanded).toBe(false);
   });
+
+  it('defaults sidebarCollapsed to false when nothing is persisted', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.sidebarCollapsed).toBe(false);
+  });
+
+  it('toggleSidebarCollapsed flips the value', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    const initial = uiStore.sidebarCollapsed;
+    uiStore.toggleSidebarCollapsed();
+    expect(uiStore.sidebarCollapsed).toBe(!initial);
+  });
+
+  it('persists the toggled sidebarCollapsed value to localStorage', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.toggleSidebarCollapsed();
+    expect(localStorage.getItem('sidebarCollapsed')).toBe(String(uiStore.sidebarCollapsed));
+  });
+
+  it('loads a persisted true sidebarCollapsed value on module init', async () => {
+    localStorage.setItem('sidebarCollapsed', 'true');
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.sidebarCollapsed).toBe(true);
+  });
+
+  it('defaults sidebarWidth to 288 when nothing is persisted', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.sidebarWidth).toBe(288);
+  });
+
+  it('setSidebarWidth updates the value within range', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.setSidebarWidth(350);
+    expect(uiStore.sidebarWidth).toBe(350);
+  });
+
+  it('setSidebarWidth clamps below the minimum', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.setSidebarWidth(50);
+    expect(uiStore.sidebarWidth).toBe(180);
+  });
+
+  it('setSidebarWidth clamps above the maximum', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.setSidebarWidth(1000);
+    expect(uiStore.sidebarWidth).toBe(480);
+  });
+
+  it('persists setSidebarWidth to localStorage', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.setSidebarWidth(320);
+    expect(localStorage.getItem('sidebarWidth')).toBe('320');
+  });
+
+  it('loads a persisted sidebarWidth value on module init', async () => {
+    localStorage.setItem('sidebarWidth', '400');
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.sidebarWidth).toBe(400);
+  });
+
+  it('falls back to the default sidebarWidth for a corrupted persisted value', async () => {
+    localStorage.setItem('sidebarWidth', 'not-a-number');
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.sidebarWidth).toBe(288);
+  });
+
+  it('clamps a persisted sidebarWidth value that is out of range', async () => {
+    localStorage.setItem('sidebarWidth', '900');
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.sidebarWidth).toBe(480);
+  });
 });
