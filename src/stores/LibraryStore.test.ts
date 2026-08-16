@@ -1,3 +1,4 @@
+import { reaction } from 'mobx';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FolderRecord, TuneRecord } from '../api/tunesClient';
 
@@ -109,6 +110,48 @@ describe('LibraryStore', () => {
 
     expect(tunesClientMocks.createFolder).toHaveBeenCalledWith({ parentId: null, title: 'New Folder' });
     expect(libraryStore.childrenOf(null).map((n) => n.id)).toContain('new-f');
+  });
+
+  it('childrenOf(null) is MobX-reactive to createFolder even though it only mutates the node index maps', async () => {
+    const libraryStore = await freshStore([]);
+    const created = folder({ id: 'new-f', title: 'New Folder', parentId: null });
+    tunesClientMocks.createFolder.mockResolvedValue(created);
+
+    const seen: string[][] = [];
+    const dispose = reaction(
+      () => libraryStore.childrenOf(null).map((n) => n.id),
+      (ids) => seen.push(ids),
+    );
+
+    // createFolder only touches nodesById/childrenByParent - it never assigns
+    // currentFolderId or selected - so this only proves reactivity if the
+    // index maps themselves are observable.
+    await libraryStore.createFolder('New Folder');
+
+    dispose();
+    expect(seen).toEqual([['new-f']]);
+  });
+
+  it('breadcrumb is MobX-reactive to rename() of a folder in the trail, which only mutates the node index maps', async () => {
+    const outer = folder({ id: 'outer', title: 'Outer', parentId: null });
+    const inner = folder({ id: 'inner', title: 'Inner', parentId: 'outer' });
+    const libraryStore = await freshStore([outer, inner]);
+    libraryStore.navigateTo('inner');
+    const renamedOuter = folder({ id: 'outer', title: 'Renamed Outer', parentId: null });
+    tunesClientMocks.renameFolder.mockResolvedValue(renamedOuter);
+
+    const seen: string[][] = [];
+    const dispose = reaction(
+      () => libraryStore.breadcrumb.map((f) => f.title),
+      (titles) => seen.push(titles),
+    );
+
+    // rename() on a folder that isn't currentFolderId/selected only touches
+    // nodesById/childrenByParent - proves breadcrumb reacts to node index changes.
+    await libraryStore.rename('outer', 'Renamed Outer');
+
+    dispose();
+    expect(seen).toEqual([['Renamed Outer', 'Inner']]);
   });
 
   it('createFolder is a no-op locally when the API call fails', async () => {

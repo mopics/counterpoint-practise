@@ -36,8 +36,12 @@ class LibraryStore {
   loaded = false;
   loadError = false;
 
-  private nodesById = new Map<string, LibraryNode>();
-  private childrenByParent = new Map<string | null, LibraryNode[]>();
+  // Not `private`: TypeScript's `keyof` excludes `private`-modified members
+  // (even from within the declaring class), so a private field's name can
+  // never legally appear in makeObservable's annotations object literal.
+  // These are internal state and not meant to be used outside this class.
+  nodesById = new Map<string, LibraryNode>();
+  childrenByParent = new Map<string | null, LibraryNode[]>();
 
   constructor() {
     makeObservable(this, {
@@ -45,6 +49,8 @@ class LibraryStore {
       selected: observableRef,
       loaded: observable,
       loadError: observable,
+      nodesById: observable,
+      childrenByParent: observable,
       navigateTo: actionBound,
       setSelected: actionBound,
       createFolder: actionBound,
