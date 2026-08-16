@@ -1,0 +1,9 @@
+{
+  "id": "for-minor-s-only-daybreak-denmark-1979-0c7baa22",
+  "type": "tune",
+  "parentId": "chet-baker-d7892cc5",
+  "title": "For Minor's Only - Daybreak Denmark 1979",
+  "data": "X: 1\nT: For Minor's Only - Daybreak Denmark 1979\nC: Chet Baker Trio NH0P(Bass) Doug Raney(Guitar)\nQ: 60\nM: 4 / 4\nL: 1 / 8\nK:F\n%%MIDI gchord zzzzzzzz\nV:1\n\"D-7\" z8 | z4 C2 EG| z F-F6-|F6 D |\n\"G-7\" G4 z4 | z8 | z8 z2 z c |_b z AG z A BA- |\n\"E-7\" A6 D2 | \"F-7\" z2 z _b-b3 c |\"E-7\" A8- | A4 z2 f2- |\nf6 e2 |\"A7b9\"d2 A2 G2 F2 | \"D-7\" D4 B,2 z2 | \"E-7b5\" z4 \"A7b9\" z D z F- |\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

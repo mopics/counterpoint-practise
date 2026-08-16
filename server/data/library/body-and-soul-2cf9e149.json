@@ -1,0 +1,9 @@
+{
+  "id": "body-and-soul-2cf9e149",
+  "type": "tune",
+  "parentId": "tunes-35630afc",
+  "title": "Body and Soul",
+  "data": "X:1\nT: Body and Soul\nC: John Green/Edward Heyman/Robert Sour/Frank Eyton\nQ: 96\nM:4/4\nL:1/8\nK: Db\n|d2d2d2d2|:\"Eb-7\" zE FE \"Bb7b9\" F2E2 | \"Eb-7\" B2 B2- \"Ab7\" B4 | \"Db^\" z a ba \"Gb7\" b2 a2 | \"F-7\" e2 d2 \"Eo7\" c2 B2 |\n\"Eb-7\" z2 d2(3:B2G2B,2 | \"C-7b5\" F4 \"F7\" E4| \"Bb-7\" z d ef \"Eb-7\" a2 \"Ab7\" (3:ab=c||1 \"Db6\" D4 \"Bb7\" z4:||2 \"Db6\" D4 \"E-7\" z2 \"A7\" z2||\nK:D\n||\"D^\" zd ef \"E-7\" aa2a| \"D/F#\" d'd'2 f \"G-7\"a a-\"C7\"a g | \"F#-7\" f f-\"B-7\"fd \"E-7\" e2 \"A7\"c2 | \"D^\" A6 z2|\n\"D-7\" z d e=f \"G7\"a a2 g | \"C^\" ee2 B \"Ebo7\" dd2 A| \"D-7\" =cc2 A \"G7\"BB2 G| \"C7\" e2 \"B7\" ^d2 \"Bb7\" =d2 _b2 ||\nK: Db\n||\"Eb-7\" zE FE \"Bb7b9\" F2E2 | \"Eb-7\" B2 B2- \"Ab7\" B4 | \"Db^\" z a ba \"Gb7\" b2 a2 | \"F-7\" e2 d2 \"Eo7\" c2 B2 |\n\"Eb-7\" z2 d2(3:B2G2B,2 | \"C-7b5\" F4 \"F7\" E4| \"Bb-7\" z d ef \"Eb-7\" a2 \"Ab7\" (3:ab=c| \"Db6\" D4 \"Bb7\" z4||\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "bebop-enclousure-exersize-3bde684d",
+  "type": "tune",
+  "parentId": "dec-25-57e5de45",
+  "title": "Bebop enclousure exersize",
+  "data": "X:1\nT: Bebop enclousure exersize\nQ: 190\nM:4/4\nL:1/8\nK: C\n|: **C** DB,C2 E^CD2 F^D=E2 GEF2 | A^FG2 B^GA2 c^AB2 dBc2 :|\nT: Bebop Major Scale\n|: CDEF G_A=AB c4 :|\nT: Bebop Dominant Scale\n|: CDEF GA_B=B c4 :|\nT: Bebop Minor Scale\n|: CD_E=E FGAB c4 :|\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

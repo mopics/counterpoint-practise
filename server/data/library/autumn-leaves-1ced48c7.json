@@ -1,0 +1,9 @@
+{
+  "id": "autumn-leaves-1ced48c7",
+  "type": "tune",
+  "parentId": "tunes-35630afc",
+  "title": "Autumn Leaves",
+  "data": "X: 1\n%% Copyright 1947, 1950 Encoh et cie\nT:Autumn leaves\nM:4/4\nL:1/4\nC:Joseph Kosma & Johnny Mercer\nQ:1/4=150\nK:Gm\n%%text (medium)\n%%vskip 20\nP:A\nGAB || \"Cm7\"e4- | \"F7\"eFGA | \"Bbmaj7\"d2d2- | \"Ebmaj7\"dEFG |\nw:The fall-ing leaves* drift by my win-dow,* the au-tumn\n\"Am7b5\"c4- | \"D7\"cD=E^F | \"Gm6\"B4 | zGAB ||\nw:leaves* og red and gold. I see your\nP:A\n\"Cm7\"e4- | \"F7\"eFGA | \"Bbmaj7\"d2d2- | \"Ebmaj7\"dEFG |\nw:lips,* the sum-mer kiss-es,* the sun-burned\n\"Am7b5\"c4- | \"D7\"cAcB | \"Gm6\"G4 | z2^FG ||\nw:hands* I used to hold. Since you\nP:B\n\"Am7b5\"ADA2- | \"D7\"AAGA | \"Gm6\"B4- | BBAB |\nw:went a-way* the days grow long,* and soon I'll\n\"Cm7\"c4- | \"F7\"cFfe | \"Bbmaj7\"d4- | \"Ebmaj7\"d2^cd ||\nw:hear* old win-ter's song.* But I\nP:A'\n\"Am7b5\"eecc | \"D7\"A3e | \"Gm7\"d2 \"(C7\"d2- | \"Fm7\"d2 \"Bb7)\"G2 |\nw:miss you most of all my dar-ling,* when\n\"Ebmaj7\"c3B | \"D7\"A2BD | \"Gm6\"G4- | G2z2 |]\nw:au-tumn leaves start to fall.*\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

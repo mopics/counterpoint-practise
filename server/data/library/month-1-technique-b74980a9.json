@@ -1,0 +1,9 @@
+{
+  "id": "month-1-technique-b74980a9",
+  "type": "tune",
+  "parentId": "month-1-ea1c4bb8",
+  "title": "Month 1 Technique",
+  "data": "X: 1\nT: Month 1 - TECHNIQUE\nM:4/4\nL:1/16\nQ: 90\nT: C Major Scale\n|:CDEF GABc defg abc'd' e'f'e'd' | c'bag fedc BAGF EDCB, :|\nT: A Harmonic Minor Scale\n|: ABcd ef^ga bc'd'e' f'e'd'c' | ba^gf edcB A^GFE DCB,C DEF^G :|\nT: C Major Arpeggios\n|: CEGc egc'e' c'gec GECE | Gceg c'e'c'g ecGE :|\nT: A Harmonic Minor Arpeggios\n|: Acea c'e'c'a ecAE CEAc |eac'e' c'aec AECE :|\nT: C Major Thirds\n|: CEDF EGFA GBAc Bdce | dfeg fagb ac'bd' c'e'd'f' |\ne'c'd'b c'abg afge fdec | dBcA BGAF GEFD ECDB, :|\nT: A Harmonic Minor Thirds\n|:AcBd cedf e^gfa ^gbac' bd'c'e' | bd'c'e' d'f'e'c' d'bc'a b^gaf |\n^gefd ecdB cAB^G AF^GE |FDEC DB,CE DFE^G FA^GB :|\n\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

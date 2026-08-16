@@ -1,0 +1,9 @@
+{
+  "id": "month-1-sound-baa13c28",
+  "type": "tune",
+  "parentId": "month-1-ea1c4bb8",
+  "title": "Month 1 Sound",
+  "data": "X: 1\nT: Month 1 - SOUND\nM:4/4\nL:1/4\nQ: 90\nT:1\n|::!f!_B,4 :||:!mf!_B,4 :||:!mp!_B,4 :||:!p!_B,4 :||:!pp! !>!_B,4!! :||\nT:2\n_(_B,2C_B,4) |_(_B,2D_B,4) |_(_B,2_E_B,4) |_(_B,2F_B,4) |\n_(_B,2G_B,4) |_(_B,2A_B,4) |_(_B,2_B_B,4) ||\nT: Tone Study 5\n_B, D F _B | B^F ^D B, | C E G c | _d _AF_D | D^FAd | _e_B G_E| \nE^GBe | fcAF |^F^A^c^f | gdBG | _Ac_e_a | ae^cA | \n\"^continue after A to _b octave higher\"_B d f ^\"etc.\"_b\nT: Overtone studie\n(_A2[_A_A,]2) | (_A2[_A_A,]2) | (_A2[_A_A,]2) | [_A_A,]4 |\n^\"the same with A Bb & B\" A,2 _B,2 B,2\n\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

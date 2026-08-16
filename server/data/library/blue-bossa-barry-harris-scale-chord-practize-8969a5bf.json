@@ -1,0 +1,9 @@
+{
+  "id": "blue-bossa-barry-harris-scale-chord-practize-8969a5bf",
+  "type": "tune",
+  "parentId": "dexter-gordon-de73cc98",
+  "title": "Blue Bossa - Barry Harris - Scale Chord Practize",
+  "data": "X:1\nK: Eb\nQ: 72\n\"C-7\" **C** CDEF G=ABc | B=AGF EDC2 |\n\"F-7\" **F** FGAB cdef | **C** \"Bb7\" Bcde fgab  |\n\"D-7b5\" DEFG ABcd | \"G7\" GA=Bc defg |\n\"C-7\" CDEF G=ABc | \"D-7b5\" DEFG-\"G7\" GA=Bc |\n\"Eb-7\" **Eb** _EF_G_A _Bc_d_e | \"Ab7\" **Ab** _A_Bc_d _ef_g_a |\n\"Db^\" **Db** _D_EF_G _A_Bc_d | c_B_A_G F_E_D2 |\n    ",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

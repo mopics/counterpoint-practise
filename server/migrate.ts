@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { mkdir, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { FILE_TREE, type AbcData } from '../src/content/index.ts';
 import type { FolderRecord, LibraryNode, TuneRecord } from './libraryStore.ts';
 
@@ -74,6 +75,11 @@ async function main(): Promise<void> {
   console.log(`Migrated ${folderCount} folder(s) and ${tuneCount} tune(s) into ${dataDir}`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// process.argv[1] is a raw OS path (backslashes, no file:// prefix on
+// Windows) while import.meta.url is a properly encoded file:// URL — a
+// naive string comparison between them never matches on Windows.
+// pathToFileURL() normalizes argv[1] into the same URL form for a
+// reliable "was this module run directly?" check on every platform.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   void main();
 }

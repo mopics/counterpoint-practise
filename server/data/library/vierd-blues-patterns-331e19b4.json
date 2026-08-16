@@ -1,0 +1,9 @@
+{
+  "id": "vierd-blues-patterns-331e19b4",
+  "type": "tune",
+  "parentId": "sonny-rollins-dd1d5699",
+  "title": "Vierd Blues Patterns",
+  "data": "X: 1\nT: Vierd Blues Patterns\nM:4/4\nL:1/8\nQ:112\nK:C\nT: II V7's\nV:1 clef=treble-8\n|:\"D-7\" e/cA/ e2 cA z2 |\"G7\"GE _A4 z2 :|\n|:\"D-7\" G2 z _G F2-(3FAc|\"G7\"ec z6 :|\n|: \"D-7\"g/e/g/A/ ^c/e/d/^c/ =c/A/B/G/ A/F/z/E/ | \"G7\" G/E/F/F/ E/F/A/c/ e/f/e/d/ c/G/B/d/ :|\n|: \"D-7\" fe/d/ A/G/^c-^c2 e/c/A/F/ | \"G7\" =c/A/B/A/ G/_G/(3F/A/c/ e/f/d/c/ B/d/f/a/ :|\n|: \"D-7\"c'b/a/ =g/_g/f/e/ \"G7\"d/c/A/^A/ B/_A/G/F/ :|\n|: \"D-7\" e/^c/d/e/ f/=c/A/F/ f3/2e/ c z :|\nT: Melodic Motives\n|:\"F7\" b/c'/d'/b/ (3c'd'_e' b z (3g_eB | G2 z6 :|\n|:\"F7\" ^\"variant 1\"z4 b/g/a/b/ g/_e/=B/z/ :|\n|:\"F7\" ^\"variant 2\" (6g/^f/g/_e/c/G/ d2 z4 :|\n|:\"F7\" ^\"variant 3(water AugTri)\" z4 z2 c'/_e'/g/b/ | _e/g/B/_e/ z/ G/B/ z/ z4:|\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

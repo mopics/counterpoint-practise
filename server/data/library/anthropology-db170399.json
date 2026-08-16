@@ -1,0 +1,9 @@
+{
+  "id": "anthropology-db170399",
+  "type": "tune",
+  "parentId": "tunes-35630afc",
+  "title": "Anthropology",
+  "data": "X:1\nT: Anthropology\nC: Charlie Parker/Dizzy Gillespie\nQ: 220\nK:Bb\nM:4/4\nL:1/8\n|:\"Bb6\"B,DCB, E^CDF | \"C-7\" z2 z E \"F7\" z F E2 | \"Bb6\" z DED \"G-7\"CA,B,D |\n\"C-7\" CG,B,A, \"F7\"z2 z B,-|\"F-7\"**Eb**B,2 G,B, \"Bb7\"DB, z =E| \"Eb7\"**Ab** z _E z _G,-\"Ab7\"**Db**G,B,CD |\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

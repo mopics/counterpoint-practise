@@ -1,0 +1,9 @@
+{
+  "id": "blue-bossa-dexter-gordon-ii-vs-2931db0d",
+  "type": "tune",
+  "parentId": "dexter-gordon-de73cc98",
+  "title": "Blue Bossa - Dexter Gordon - II-Vs",
+  "data": "X:1\nT: Blue Bossa - II-Vs\nC: Dexter Gordon\nQ: 200\nM:4/4\nL:1/8\nK: C\n\"D-7b9\" z2 _EC D _B3 | \"G7b9\" _EC D _A4 F | \"C-6\" G_EFD _EFG=A | (3d_ed c=B =AGF=E |\nw: regular . minor . . . . . .  Melodic . Minor\n**Db** \"Eb-7\" _EF_G_A _Bc_d_e | \"Ab7\" f_g_a_g f_d_B_G | \"Db^\" F6 _ec | _d _B3 z4 |\n\"D-7b9\" (3z2_e2d2 f4 | \"G7b9\" (3_e2d2z2 g3 f | \"C-\" _efd_e cd_ef | g_agf _e=B_B_A | G2\nw: . . . . . . . . Harmonic . Minor\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

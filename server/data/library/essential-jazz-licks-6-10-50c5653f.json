@@ -1,0 +1,9 @@
+{
+  "id": "essential-jazz-licks-6-10-50c5653f",
+  "type": "tune",
+  "parentId": "improvisers-reference-05627317",
+  "title": "Essential Jazz Licks 6-10",
+  "data": "X:1\nT: Essential Jazz Licks 6-10\nQ: 120\nM:4/4\nL:1/8\nK:C\n\"D-7\"c2 d^\"[7-3]\"c \"G7\"B_^\"[3-b9]\"_agf^\"7-3\"|\"C^\"e8 |\n\"D-7\"^GAc^\"encl\"^A \"G7\" B=A=GF^\"7-3\" | \"C^\"E8 |\n\"D-7\" ^c/^\"cr\"d/f/a/ ^\" ] encl.\"c'/a/^a/b/ \"G7\"^\"]\"g/^g/=a/f/ d/=c/B/_a/ ^\"3-b9\" | \"C^\" g8 |\n\"D-7\" ^\"cesh\" afdA ^cA=c^\"7-3\"^A |\"G7\"B^\"cr\"df^\"3-b9\"g _a^\"encl\"^fg=f^\"7-3\"|\"C^\"e8|\n\"D-7\"z2 ^\"bbs\"g_gfedc | \"G7+9+5\"^\"7-3\"B^\"tt-ad\"^d^c^B ^A^G=GF | \"C^\" ^\"7-3\" E8 |\nW: dp = digital pattern\nW: cr = change-running\nW: enc = enclosure\nW: cesh = Contrapunctal Elaboration of Static Harmony\nW: bbs = Bebop scale\nW: tt-ad = tri-tone substitution for V7 or altered V7\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

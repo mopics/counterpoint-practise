@@ -1,0 +1,9 @@
+{
+  "id": "cherokee-aa5f4c1d",
+  "type": "tune",
+  "parentId": "tunes-35630afc",
+  "title": "Cherokee",
+  "data": "X:1\n%% Copyright 1938 by The Peter Maurice Music Co. Ltd, London\nT:Cherokee\nM:4/4\nL:1/4\nC:Ray Noble\nQ:1/4=300\n%%staves (chords melody)\nK:Bb\n%%text (up)\n%%vskip 20\nP:A\nV:chords\n\"Bb6\"x2 x2 | x2 \"F7+\"x2 | \"Bb7\"x2 x2 | x2 x2 |\n\"Ebmaj7\"x2 x2 | x2 x2 | \"Ebm6\"x2 x2 | x2 x2 |\n\"Bb6\"x2 x2 | x2 x2 | \"C7\"x2 x2 | x2 x2 |\n[1\"Cm7\"x2 x2 | \"Bdim7\"x2 x2 | \"Cm7\"x2 x2 | \"F7+\"x2 x2 :|\n[2\"Cm7\"x2 x2 | \"F7\"x2 x2 | \"Bb6\"x2 x2 | x2 !fine!x2 ||\nV:melody\nD4 | F2G2 | B4 | G4 |\nw:Sweet In-dian maid-en,\nw:Child of the prair-ie,\nw:sweet In-dian maid-en,\nF4 | D2F2 | D4 | C4 |\nw:since first I met you,\nw:your love keeps call-ing,\nw:one day I'll hold you\nB,4 |D2F2 | d4 | B4 |\nw:I can't for-get you.\nw:my heart en-thrall-ing.\nw:in my arms fold you\n[1G4 | F2D2 | C4 | ^C4 :|\nw:Cher-o-kee, sweet-heart\nw:*****\nw:*****\n[2G4 | D4 | B,4- | B,z3  ||\nw:****\nw:Cher-o-kee!*\nw:Cher-o-kee!*\nP:B\nV:chords\n\"C#m7\"x2 x2 | \"F#7\"x2 x2 | \"Bmaj7\"x2 x2 | x2 x2 |\n\"Bm7\"x2 x2 | \"E7\"x2 x2 | \"Amaj7\"x2 x2 | x2 x2 |\n\"Am7\"x2 x2 | \"D7\"x2 x2 | \"Gmaj7\"x2 x2 | x2 x2 |\n\"Gm7\"x2 x2 | \"C7\"x2 x2 | \"Cm7\"x2 x2 | \"F7+\"x2 !D.C.!x2 ||\nV:melody\n^d4- | d2^c2 | ^c^A^F2- | F2^c2 |\nw:Dreams* of sum-mer time* of\n^c=A^F2- | F2=B2 | =E4- | E3z |\nw:lo-ver time* gone by.*\n=B4- | B2A2 | A^FD2- | D2A2 |\nw:Throng* my mem-o-ry* so\nA=FD2- | D2G2 | C4 | ^C4 ||\nw:ten-der-ly* and sigh. My\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

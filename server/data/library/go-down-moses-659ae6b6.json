@@ -1,0 +1,9 @@
+{
+  "id": "go-down-moses-659ae6b6",
+  "type": "tune",
+  "parentId": "carapax-a7fbc1a4",
+  "title": "Go Down Moses",
+  "data": "X: 1\nT: Go Down Moses\nM:4/4\nL:1/4\nQ: 90\n%%MIDI gchord zzzzzzzz\nV:1 clef=treble\n||:**A**\"A-\" (cc \"D-\"BB |\"A-\"cc \"D-\"A2 | \"E7\"EE^G^G | \"A-\"A3) E|\n\"A-\"(cc \"D-\"BB | \"A-\"cc \"D-\"A2 | \"E7\"EE^G^G | \"A-\"A3) z|\n\"A-\"A A2 z | \"D-\"d d2 z | \"A-\"(e2 \"E7\"e3/2d/|\"E7\"ed \"A-\"c/ A3/2)|\n\"D-\"c A2 z| \"A-\"c A2 z|\"E7\"(EE^G^G) | \"A-\"A3 z :||\nV:2 clef=bass\n[A,CE]2 [A,DF]2 | [A,CE]2 [A,DF]2 | (E, D, C, B,, | A,,3) z |\n[A,CE]2 [A,DF]2 | [A,CE]2 [A,DF]2 | (E, D, C, B,, | A,,3) z |\n[A,CE] [A,CE]2 z | [A,DF] [A,DF]2 z | [A,CE]2 [^G,DE]2 |[^G,DE]2 [A,CE]2 |\n[A,DF]4 | [A,CE]4 | (E, D, C, B,, | A,,3) z :||\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

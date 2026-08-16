@@ -1,0 +1,9 @@
+{
+  "id": "bblines-2-a0ed82cb",
+  "type": "tune",
+  "parentId": "bblines-0f5cb582",
+  "title": "BBLines 2",
+  "data": "X:1\nT:BBLines 2\nC:Ed Friedland\nM:4/4\nL:1/4\nQ: 90\nK:Bb\nV: 1 clef=bass\n%%MIDI gchord zzzzzzzz\n|:\"F7\" F,, F,, F, F, | \"Bb7\" _B,, _B,, _B, _B, |\"F7\" F,F, F, F, | F,, F,, F,, F,,|\n\"Bb7\" _B,,_B,, _B,,_B,, | _B,_B,_B,_B, | \"F7\" F,F,F,F, | F,,F,,F,,F,,|\n\"G-7\" G,,G,,G,G, | \"C7\" C, C,CC | \"F7\" F,F, \"D-7\" D,D, | \"G-7\" G,G, \"C7\" C,C, :|\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

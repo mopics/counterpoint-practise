@@ -1,0 +1,9 @@
+{
+  "id": "5-licks-that-explain-most-of-bebop-82b5f066",
+  "type": "tune",
+  "parentId": "jens-larsen-8a9a1dac",
+  "title": "5 Licks That Explain Most of Bebop",
+  "data": "X:1\nT: 5 Licks That Explain Most of Bebop\nQ:200\nM:4/4\nL:1/8\nK:C\nT: Lick #1 (Hitting the 3rd on beat 1)\n|:\"D-7\" fde.f zdcA|\"G7\" B.g z2 dfed| \"C^\"ec z6:| \nT: Lick #2 (Telling a Story with Energy)\n|:\"D-7\" ac'af edcA| \"G7\"Bdza gBdf| \"C^\"eGdc z4 :|\nT: Lick #3 (Arpeggios!)\n|:\"D-7\" DFAc zedc | \"G7\" (3:Bdf ag z dfd | \"C^\"egbd'-d'2 z2 :|\nT: Lick #4 (Funny Notes & Enclosures (Diatonic-above/Chromatic-below)\n|:\"D-7\" zF (3:Gce d_dc^A | \"G7\"Bdzf gBf^d| \"C^\" eG^FG dc z2 :|\nT: Lick #5 (Changing G7 to G7b9, for a bit more tension)\n|: \"D-7\" FAce defg | \"G7\"_aBgf dB_AF | \"C^\" GEFG z4 :|\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

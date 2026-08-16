@@ -1,0 +1,9 @@
+{
+  "id": "101-bebop-ii-v7-patterns-08d8e6aa",
+  "type": "tune",
+  "parentId": "david-baker-7135d726",
+  "title": "101 - Bebop II-V7 Patterns",
+  "data": "X:1\nT: 101 - Bebop II-V7 Patterns - David Baker (How to Play Bebop - volume 2)\nQ: 190\nM:4/4\nL:1/8\nK: C\n|:\"D-\"**D**D^CDE FGAc |\"G7\"**G** efed ^cB_B_A | \"C^\"**C**G2 z6 :|\nT:2\n|:\"D-\"**D**D^CDE FEFG | \"G7\"**G** AcA^A B=AGF | \"C^\"**C** E2 z6 :|\nT:3\n|:\"D-\"**D**D^CDE FGAc |\"G7\"**G** e_ed_d cAFD |\"C^\"**C**_B_A/_B/ GF/G/ E2 :|\nT: 4\n|:\"D-\"**D**DEFG AcBA |\"G7\"**G** G_GFA ED-D2 |\"C^\"z8 :|\nT: 5\n|:\"D-\"**D**DFED GE (3FAc |\"G7\"**G** egfe _e=BGF |\"C^\"E2 z6 :|\nT: 6\n|: \"C\" **D**z6 DE || \"D-\"FGEF DEFG |\"G7\"**G** AcA^A B_B=A_A |\"C^\"G2 z6 :|\nT: 7\n|: \"D-\" deg_g fedc | \"G7\" BAG_G FAED | \"C^\" z8 :|\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

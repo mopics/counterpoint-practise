@@ -1,0 +1,9 @@
+{
+  "id": "db-chromatic-lydian-scales-5e4d2d59",
+  "type": "tune",
+  "parentId": "david-baker-7135d726",
+  "title": "DB Chromatic Lydian Scales",
+  "data": "X:1\nT: DB Chromatic Lydian Scales\nC: David Baker\nQ: 190\nM:4/4\nL:1/4\nK: C\n\"Lydian\" CDE^FGABc | \n\"Lydian augmented\" CDE^F^GABc | \n\"Lydian diminished\" CD_E^FGABc | \n\"Auxiliary diminished\" CD_E^F^GABc | \n\"Auxiliary augmented\" CDE^F^G_Bc |\n\"Auxiliary Diminished Blues\" C_D_E=E^FGA_Bc |\n\"Major\" CDEFGABc |\n\"Blues\" C_E=EF^FG_Bc |\n\"Lydian Chromatic\" C^CD^DEF^FG^GA^ABc |\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

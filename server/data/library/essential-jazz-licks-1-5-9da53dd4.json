@@ -1,0 +1,9 @@
+{
+  "id": "essential-jazz-licks-1-5-9da53dd4",
+  "type": "tune",
+  "parentId": "improvisers-reference-05627317",
+  "title": "Essential Jazz Licks 1-5",
+  "data": "X:1\nT: Essential Jazz Licks 1-5\nQ: 60\nM:4/4\nL:1/8\nK:C\n|: \"D-7\" ^\"dp\" DEFA \"G7\" GABd | \"C^\" cdeg-g4 |\n\"D-7\" ^\"cr\" afd^\"7-3\"c \"G7\" ^\"cr\"Bdfa | \"C^\" ^\"dp\" gedc-c4 |\n\"D-7\" ^\"cr\" afd^\"7-3\"c \"G7\" ^\"3-b9\"B_AGF | \"C^\" ^\"7-3\"E8|\n\"D-7\" ^\"enc./7-3\" c2A^A B \"G7\" g2 ^\"7-3\"f|\"C^\"e8|\n\"D-7\" ^\"cr\" D2 (3FAc \"G7\"^\"7-3\"B g2 ^\"7-3\"f|\"C^\"e8 :|\nW: dp = digital pattern\nW: cr = change-running\nW: enc = enclosure\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

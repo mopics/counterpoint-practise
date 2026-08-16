@@ -1,0 +1,9 @@
+{
+  "id": "essential-jazz-licks-11-15-80b46d6a",
+  "type": "tune",
+  "parentId": "improvisers-reference-05627317",
+  "title": "Essential Jazz Licks 11-15",
+  "data": "X:1\nT: Essential Jazz Licks 11-15\nQ: 120\nM:4/4\nL:1/8\nK:C\n|: \"D-7\"^\"cmar\" e2 (3dAF E D3 |\"G7+9+5\"^\"cmar\" ^a2 (3_a^dB ^A _A3 | \"C^\" G8 :|))\n|: \"C^\" efed \"A7\" ^\"3-b9\"^c_BAG | \"D-7\"F8 :|\n|: \"C^\"^\"dp\" GABc \"A7\"^\"3-b9\" ^c_bag | \"D-7\"f8 :|\n|: \"D07\" ^\"bbl\" _BA_Ac GF3 | \"G7+5+9\" ^\"bbl\" _dcB^d _B_A3 | \"C^\" ^\"bbl\" fe_eg d c3-|c8 :|\n|: \"D07\" ^\"cmar\" g2 (3fc_A G F3 |\"G7+5+9\" ^\"cmar\"^a2 (3_a^dB ^A _A3 | \"C-^\" ^\"cmar\" d'2 (3c'g_e d c3- |c8 :|\nW: cmar = cry me a river lick\nW: dp = digital pattern\nW: bbl = bebop lick\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

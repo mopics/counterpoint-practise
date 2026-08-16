@@ -1,0 +1,9 @@
+{
+  "id": "db-chromatic-lydian-i-e2b8d2de",
+  "type": "tune",
+  "parentId": "david-baker-7135d726",
+  "title": "DB Chromatic Lydian : I",
+  "data": "X:1\nT: DB Chromatic Lydian : I\nC: David Baker\nQ: 190\nM:4/4\nL:1/8\nK: C\n| \"1\" CDEFGABc DEFGABcd EFGABcde FGABcdef GABcdefg ABcdefga| Bcdefgab cdefgabc' |\nbagfedcB agfedcBA gfedcBAG fedcBAGF edcBAGFE dcBAGFED cBAGFEDC ||\nL:1/4\n\"2\" CEDFEGFAGBAcBdc4 | cABGAFGEFDECDB,C4 |\n\"3\" CFDGEAFBGcAdBec4 | cGBFAEGDFCEB,DA,C4 |\n\"4\" CGDAEBFcGdAeBfc4 | c'fbeadgcfBeAdGc4 |\n\"5\" CADBEcFdGeAfBgc4 | c'ebdacgBfAeGdFcEc4 |\n\"6\" CBDcEdFeGfAgBac4| c'dbcaBgAfGeFdEc4 |\n\"7\" CcDdEeFfGgAaBbc4 | c'cbBaAgGfFeEdDc4 |\nL: 1/8\n\"8\" (3:CDE (3:DEF (3:EFG (3:FGA (3:GAB (3:ABc (3:Bcd c4 |\n(3:cBA (3:BAG (3:AGF (3:GFE (3:FED (3:EDC (3:DCB, C4 |\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

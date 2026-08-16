@@ -1,0 +1,9 @@
+{
+  "id": "essential-jazz-licks-16-20-c7ff58c6",
+  "type": "tune",
+  "parentId": "improvisers-reference-05627317",
+  "title": "Essential Jazz Licks 16-20",
+  "data": "X:1\nT: Essential Jazz Licks 16-23\nQ: 120\nM:4/4\nL:1/8\nK:C\n|:\"D07\"^\"GBNF\"G_AEG FC3| \"G7alt\"^ABG_B _A^D3 | \"C-^\" d_eBdcG3-|G8 :|\n|:\"G-\"^\"CH1\"cdec dcAG:|\n|:\"C^\"^\"CH2\" GcAF DGEC :|\n|: \"Eb7\" ^\"CH3\" c'_b^fe ag_e_d | ^fec_B _e_dAG :|\n|: \"C7\" ^\"CH3\" _e'c'g=e a^f^c_B :|\n|: \"Eo\" ^\"CH3\" _e'/c'/g/_e/ a/^f/_b/g/ c'/a/=e/^c/ ^f/^d/g/=e/ |a/^f/^c/_B/ ^d/=c/e/^c/ ^f/_e/_B/G/ =c/G/_d/_B/ :|\n^\"CH4\" g |: \"Eb^+5\" ^f^dB^d =dBGB | _BG_EG ^F^DB2 :|\nW: GBNF = Gone but not forgotten lick\nW: CH1 = Fits C^, F^, Bb^+4, A-7, D-7, G-7, D7sus, Gysus, C7sus, E07\nW: CH2 = Fits C^, F^, Bb^+4, D-7, G-7, G7sus, C7sus\nW: CH3 = Fist C7, Eb7, Gb7, A7, C#o, Eo, Go, Bbo (Dominant/(b9)Dims - tritone family)\nW: CH4 = Fits G^+5, Eb^+5 or B^+5 (Augmented family)\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

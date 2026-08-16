@@ -1,0 +1,9 @@
+{
+  "id": "rythem-changes-etude-c-e60506ce",
+  "type": "tune",
+  "parentId": "month-1-ea1c4bb8",
+  "title": "Rythem Changes Etude - C",
+  "data": "X: 1\nT: Rythem Changes Etude - C\nM:4/4\nL:1/8\nQ: 90\nK: C\n**C**\"C^\" z E (3GBd \"A7b9\" ^ceg_b | \"D-7\" afed \"D#o\" ^db- b(3'c'/b/a/ | \"E-7\" gedc ^c_bag | \"D-7\" f2 (3ac'e' \"G7#5\"_e'b z2|\n\"G-7\" z e'f'^d' \"C7\" e'_e' =d' _d' | \"F^\" c'agf \"Bb7\"c'_agf| \"E-7\" e^f (3gbd' \"A7\" ^c'a z2 | \"D-7\"z afd \"G7\"^ced=c|\n\"C^\"Bceg \"A7b9\"_b_d'c'_b | \"D-7\"ac' (3afd \"G7\"b_ba_a | \"E-7\"ge z2 \"A7\" z2 z ^g|\"D-7\"afdc \"G7\"^ced=c |\n\"G-7\"BdcB \"C13\"_Bd^fa | \"F^\"gecA \"F-7\"_A_ezB| \"D-7\"dcBA \"G7\"Bcdc- | \"C^\"cdeg c'c z2 |\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

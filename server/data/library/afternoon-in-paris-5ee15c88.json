@@ -1,0 +1,9 @@
+{
+  "id": "afternoon-in-paris-5ee15c88",
+  "type": "tune",
+  "parentId": "tunes-35630afc",
+  "title": "Afternoon in Paris",
+  "data": "X:1\nT: Afternoon in Paris\nC: John Lewis\nQ: 60\nM:4/4\nL:1/8\neg |: \"C^\" zd2 c Bcde | \"C-7\"_eG_Bd c2 df | \"Bb^\" z c2 _B A_Bcd |\n\"Bb-7\"_dF_Ac _B2 c_e | \"Ab^\"z c2 _A G_B_AG-|\"D7\"G4-\"G7b9\"G_B_AG-|\n|1\"C^\"G8 |\"D-7\"z4 \"G7\"z2 eg:|2\"C^\"G8 | z4 \"A-7\"A2 Bc-||\n||\"D-7\" c6 de-|\"G7\"e6 dc-|\"C^\"c6 eA-|\"A-7\"A6 Bc-|\n\"D-7\"c6 de-|\"G7\"e6 de-|\"C#-7\"e4-e3 f-|\"D-7\"f6 eg ||\n\"C^\" zd2 c Bcde | \"C-7\"_eG_Bd c2 df | \"Bb^\" z c2 _B A_Bcd | \"Bb-7\"_dF_Ac _B2 c_e | \n\"Ab^\"z c2 _A G_B_AG-|\"D7\"G4-\"G7b9\"G_B_AG-| \"C^\"G8- |G8|\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

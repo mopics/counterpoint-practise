@@ -1,0 +1,9 @@
+{
+  "id": "coltrane-patterns-over-c-blues-653ec1b5",
+  "type": "tune",
+  "parentId": "soren-ballegaard-3f9fc768",
+  "title": "Coltrane Patterns over C Blues",
+  "data": "X:1\nT:Coltrane Patterns over C Blues\nC:Soren Ballegaard\nM:4/4\nL:1/8\nQ: 120\n|:\"C7\"**C**ecG_B-_B2 z2 | \"F7\"**F**afc_e-_e2 z2 |\"C7\"**C**(3ece- (3ecA _B2 dA-|\"C7\"AG-G4 z2|\n\"F7\"**F**_eg_ef-f3 _e|\"F7\"g2 _ef-f2 z2 | **C**\"C7\"e2gz cz c_B-|\"C7\"_B2 z d _BA c2 |\n\"G7\"**G** Bdgf-f2 z2 | \"F7\"**F**Acf_e-_e2 z2 | \"C7\"**C** Gcede_B z2 | \"G7\"**G** dBGF-F2 z2 :|\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

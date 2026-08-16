@@ -1,0 +1,9 @@
+{
+  "id": "06-12-25-moritat-licks-1722ef0d",
+  "type": "tune",
+  "parentId": "dec-25-57e5de45",
+  "title": "06-12-25 - Moritat licks",
+  "data": "X:1\nT: 06-12-25\nQ: 120\nM:4/4\nL:1/8\n%%MIDI gchord zzzzzzz\nV:1 clef=treble\n|: **C**\"C-7\" !ppp!DB,CD _EF^FG | _B4 C4:|\n|:**Bb**\"Bb6\"DDz G AcAF|A2F2G3F|\"C-7\"GGz6 :|\n|:**C**\"C-7\" z3 c g_ecd| \"F7\" fd _ef/_e/ d_BGF |\n**F**\"F7\"d_Bc_d A(3_A/G/_G/ F_E | \"Bb6\" D4 G2 z2 :|\nV:2 clef=bass-8\n%%MIDI program 32\n|: !fff!C,2G,2 _E,2 C,2 | _B,,2 D,2 F,2 A,2 :|\n|: _B,,2 F,4 D,2 | _B,,4 F,3 F,| _E,2 C,2 G,,2 C,2 :|\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

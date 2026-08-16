@@ -1,0 +1,9 @@
+{
+  "id": "01-12-25-coltrane-16th-note-dominant-lick-f8342baa",
+  "type": "tune",
+  "parentId": "dec-25-57e5de45",
+  "title": "01-12-25 Coltrane 16th note Dominant lick",
+  "data": "X:1\nT: Coltrane 16th note Dominant lick\nQ: 130\nM:4/4\nL:1/16\n%%MIDI gchord zzzzzzzz\nV:1 clef=treble\n|:**G**\"Bb7\" z4 ^\"F07\"_A^\"Backdoor\"_c^\"Dominant\"_e^\"ii:Bb-7 V:Eb7 I:Ab\"_g _b_d'2=b _b_a_gf |\n**Eb**^\"Eb:ii-V\"_ec_AF ^\"Super\"d_efd ^\"enc.\"_edcB _B_AF^F| \"Eb7\"G_e z14 :|\nV:2 clef=bass\n|:[_A,D,F,_B]2 z14 | \n[_A,D,F,_B]2 z14 | [_D,G,_B,_E]2 z14 :|\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}

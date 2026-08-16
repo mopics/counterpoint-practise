@@ -1,0 +1,9 @@
+{
+  "id": "for-minor-s-only-b7d27ff2",
+  "type": "tune",
+  "parentId": "tunes-35630afc",
+  "title": "For Minor's Only",
+  "data": "X:1\nT:For Minors Only\nM:C\nL:1/8\nC:Chet Baker and Art Pepper Sextet\nQ:1/4=120\nK:F\n|: \"D-7\"dA z d \"A7b9\"eA z e|\"D-7\"f2 ae \"A7b9\"z4 | \"D-7\"d z d z \"A7\"edef | \"D-7\" z AB=B \"D7b13\"z4 |\n\"G-7\"GD zG \"D7b9\"AD z A| \"G-7\" B2 dA \"D7b9\" z4 | \"G-7\"G z G z \"D7b9\" AGAB | \"G-7\" z D^DE z4 ||\n\"E-7\" aag^f \"A7\"e z b2-|\"F-7\"b3 _a \"Bb7\"z gf=a | \"E-7\"z g z ^f e=Bdc | \"A7\" ^ceAG z f3 |\n|1 \"D-7\"d z z A \"D-7/C\"dcAG| \"Bb7\"F z DF \"A7b13\"cB z ^G| \"D-7\"A8-|\"A7#11\"A z _e4:|\n|2 \"D-7\"d z z2 \"D-7/C\"zdf_a|\"Bb7\"z g3 \"A7b13\"fgfd-|\"D-7\"d8-|d4 z4 |\n\n",
+  "createdAt": "2026-08-16T06:56:38.147Z",
+  "updatedAt": "2026-08-16T06:56:38.147Z"
+}
