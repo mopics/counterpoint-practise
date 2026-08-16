@@ -14,12 +14,9 @@ npm install
 npm run dev
 ```
 
-## Persisting tunes (optional local server)
+## Content library (server-required)
 
-By default new tunes still have to be added by hand under `src/content/**`. Running the
-persistence server lets you add and edit tunes from the browser instead — new tunes and
-edits to existing ones are saved as JSON files under `server/data/`, without touching the
-original `.ts` content files.
+All tunes and folders live in server-side storage under `server/data/library/`, edited from the browser — there's no more static content baked into the app. **The server must be running for the app to show anything.**
 
 In a second terminal, alongside `npm run dev`:
 
@@ -27,9 +24,9 @@ In a second terminal, alongside `npm run dev`:
 npm run server
 ```
 
-This starts a local API on `http://localhost:3001`, which Vite proxies at `/api`. It's a
-personal local tool — localhost only, no authentication. If the server isn't running, the
-app falls back to the static content in `src/content/**` as usual.
+This starts a local API on `http://localhost:3001`, which Vite proxies at `/api`. It's a personal local tool — localhost only, no authentication. If the server isn't running, the app shows a "can't reach the persistence server" message instead of the library.
+
+Folders and tunes support create, rename, and delete (a folder must be empty before it can be deleted) via the sidebar's breadcrumb-navigated browser.
 
 ## Build
 
@@ -37,5 +34,5 @@ app falls back to the static content in `src/content/**` as usual.
 npm run build
 ```
 
-To use the persistence server against a production build, run `npm run server` alongside
-`npm run preview` (both proxy configs point at `http://localhost:3001`).
+The server is required in every mode, including a production build — run `npm run server`
+alongside `npm run preview` (both proxy configs point at `http://localhost:3001`).
