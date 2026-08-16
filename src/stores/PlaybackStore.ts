@@ -1,6 +1,6 @@
 import { actionBound, makeObservable, observable, observableRef, reaction, runInAction } from 'mobx';
 import { synthEngine } from '../playback/synthEngine';
-import type { AbcData } from '../content';
+import type { TuneRecord } from '../api/tunesClient';
 import type { EventRef, FlattenedTune } from '../abc/types';
 import { orderedRange } from '../abc/eventRef';
 import { endSecondsForRef, secondsForRef } from '../abc/timing';
@@ -19,7 +19,7 @@ class PlaybackStore {
   swing = synthEngine.getSwing();
 
   private swingDebounce: ReturnType<typeof setTimeout> | null = null;
-  private lastLoadedEntry: AbcData | null = null;
+  private lastLoadedEntry: TuneRecord | null = null;
   private loadGeneration = 0;
 
   constructor() {
@@ -49,9 +49,10 @@ class PlaybackStore {
     reaction(
       () => ({
         entry: libraryStore.selected,
-        abcSource: editorStore.currentAbcSource(libraryStore.selected),
+        abcSource: libraryStore.selected ? editorStore.currentAbcSource(libraryStore.selected) : undefined,
       }),
       ({ entry, abcSource }) => {
+        if (!entry || abcSource === undefined) return;
         const isEntrySwitch = entry !== this.lastLoadedEntry;
         this.lastLoadedEntry = entry;
         void this.loadSelected(abcSource, isEntrySwitch);

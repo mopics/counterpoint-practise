@@ -1,5 +1,5 @@
 import { actionBound, makeObservable, observable, runInAction } from 'mobx';
-import type { AbcData } from '../content';
+import type { TuneRecord } from '../api/tunesClient';
 import { parseTimeInput } from '../video/timeFormat';
 
 const STORAGE_KEY = 'videoLoopEntries';
@@ -22,7 +22,7 @@ function defaultEntry(): VideoLoopEntry {
  * makes their own edit, at which point the persisted edit takes over and
  * this fallback is never consulted again for that tune.
  */
-function defaultFromAbcData(entry: AbcData): VideoLoopEntry {
+function defaultFromAbcData(entry: TuneRecord): VideoLoopEntry {
   if (!entry.video) return defaultEntry();
   return {
     url: entry.video.url,
@@ -30,10 +30,6 @@ function defaultFromAbcData(entry: AbcData): VideoLoopEntry {
     loopEnd: parseTimeInput(entry.video.end),
     loopEnabled: false,
   };
-}
-
-function keyFor(entry: AbcData): string {
-  return entry.key ?? entry.id;
 }
 
 function loadEntries(): Record<string, VideoLoopEntry> {
@@ -58,30 +54,30 @@ class VideoLoopStore {
     });
   }
 
-  entryFor(entry: AbcData): VideoLoopEntry {
-    return this.entries.get(keyFor(entry)) ?? defaultFromAbcData(entry);
+  entryFor(entry: TuneRecord): VideoLoopEntry {
+    return this.entries.get(entry.id) ?? defaultFromAbcData(entry);
   }
 
-  setUrl(entry: AbcData, url: string): void {
+  setUrl(entry: TuneRecord, url: string): void {
     this.update(entry, { url });
   }
 
-  setLoopStart(entry: AbcData, loopStart: number | null): void {
+  setLoopStart(entry: TuneRecord, loopStart: number | null): void {
     this.update(entry, { loopStart });
   }
 
-  setLoopEnd(entry: AbcData, loopEnd: number | null): void {
+  setLoopEnd(entry: TuneRecord, loopEnd: number | null): void {
     this.update(entry, { loopEnd });
   }
 
-  toggleLoopEnabled(entry: AbcData): void {
+  toggleLoopEnabled(entry: TuneRecord): void {
     const current = this.entryFor(entry);
     if (current.loopStart === null || current.loopEnd === null) return;
     this.update(entry, { loopEnabled: !current.loopEnabled });
   }
 
-  private update(entry: AbcData, patch: Partial<VideoLoopEntry>): void {
-    const key = keyFor(entry);
+  private update(entry: TuneRecord, patch: Partial<VideoLoopEntry>): void {
+    const key = entry.id;
     const next = { ...this.entryFor(entry), ...patch };
     runInAction(() => {
       this.entries.set(key, next);

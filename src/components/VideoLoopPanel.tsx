@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import type { AbcData } from '../content';
+import type { TuneRecord } from '../api/tunesClient';
 import { videoLoopStore, uiStore } from '../stores';
 import { extractYouTubeVideoId } from '../video/youtubeUrl';
 import { shouldSeekToLoopStart } from '../video/loopEnforcement';
@@ -8,7 +8,7 @@ import { YouTubePlayer, type YouTubePlayerHandle } from '../video/YouTubePlayer'
 import { LoopControls } from './LoopControls';
 
 interface Props {
-  entry: AbcData;
+  entry: TuneRecord;
 }
 
 export const VideoLoopPanel = observer(function VideoLoopPanel({ entry }: Props) {
