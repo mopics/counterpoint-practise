@@ -1,24 +1,19 @@
 import { actionBound, makeObservable, observable, runInAction } from 'mobx';
-import type { AbcData } from '../content';
-import { deleteOverride, saveOverride, saveTune } from '../api/tunesClient';
+import type { TuneRecord } from '../api/tunesClient';
+import { saveTune } from '../api/tunesClient';
 import libraryStore from './LibraryStore';
 
 const COMMIT_DEBOUNCE_MS = 400;
-const MY_TUNES_PREFIX = 'lib/my-tunes/';
 
 export type SaveStatus = 'saving' | 'saved' | 'error';
 
-function keyFor(entry: AbcData): string {
-  return entry.key ?? entry.id;
-}
-
 /**
- * Session-only editing state for library entries. Two maps per entry:
+ * Session-only editing state for library tunes. Two maps per tune id:
  * `edits` updates on every keystroke and drives the textarea directly;
  * `committed` updates ~400ms after typing pauses and is what SheetView and
  * PlaybackStore consume, so re-parsing/re-priming the synth doesn't happen
- * on every keystroke. An entry is only present in either map while its text
- * differs from the original — reverting to the original clears it out.
+ * on every keystroke. A tune is only present in either map while its text
+ * differs from the tune's saved `data` — reverting clears it out.
  */
 class EditorStore {
   private edits = observable.map<string, string>();
@@ -36,95 +31,79 @@ class EditorStore {
     });
   }
 
-  /** The text for the textarea: the in-progress edit, or the entry's original source. */
-  textFor(entry: AbcData): string {
-    return this.edits.get(keyFor(entry)) ?? entry.data ?? '';
+  /** The text for the textarea: the in-progress edit, or the tune's saved source. */
+  textFor(entry: TuneRecord): string {
+    return this.edits.get(entry.id) ?? entry.data;
   }
 
-  /** The text SheetView/PlaybackStore should render/play: the debounced edit, or the original. */
-  currentAbcSource(entry: AbcData): string {
-    return this.committed.get(keyFor(entry)) ?? entry.data ?? '';
+  /** The text SheetView/PlaybackStore should render/play: the debounced edit, or the saved source. */
+  currentAbcSource(entry: TuneRecord): string {
+    return this.committed.get(entry.id) ?? entry.data;
   }
 
-  isEdited(entry: AbcData): boolean {
-    return this.edits.has(keyFor(entry));
+  isEdited(entry: TuneRecord): boolean {
+    return this.edits.has(entry.id);
   }
 
-  setText(entry: AbcData, text: string): void {
-    const key = keyFor(entry);
-    const original = entry.data ?? '';
-    if (text === original) this.edits.delete(key);
-    else this.edits.set(key, text);
+  setText(entry: TuneRecord, text: string): void {
+    const id = entry.id;
+    if (text === entry.data) this.edits.delete(id);
+    else this.edits.set(id, text);
     // A fresh edit invalidates whatever the last save/error indicator said.
-    this.saveStatus.delete(key);
-    this.saveError.delete(key);
+    this.saveStatus.delete(id);
+    this.saveError.delete(id);
 
-    const existingTimer = this.commitDebounce.get(key);
+    const existingTimer = this.commitDebounce.get(id);
     if (existingTimer) clearTimeout(existingTimer);
-    this.commitDebounce.set(key, setTimeout(() => {
+    this.commitDebounce.set(id, setTimeout(() => {
       runInAction(() => this.commit(entry, text));
     }, COMMIT_DEBOUNCE_MS));
   }
 
-  /** Clears in-progress edit state. Reverting a *saved* override also asks the server to drop it. */
-  async resetText(entry: AbcData): Promise<void> {
-    const key = keyFor(entry);
-    this.clearLocalEdit(key);
-    if (libraryStore.hasOverride(key)) {
-      const ok = await deleteOverride(key);
-      if (ok) runInAction(() => libraryStore.removeOverride(key));
-    }
+  /** Discards the in-progress edit. There's no server "original" to revert to anymore — this only ever undoes unsaved typing. */
+  resetText(entry: TuneRecord): void {
+    this.clearLocalEdit(entry.id);
   }
 
-  /** Persists the current text as a new tune or an override of an existing one. */
-  async save(entry: AbcData): Promise<void> {
-    const key = keyFor(entry);
-    this.saveStatus.set(key, 'saving');
-    this.saveError.delete(key);
+  /** Persists the current text as the tune's new canonical content. */
+  async save(entry: TuneRecord): Promise<void> {
+    const id = entry.id;
+    this.saveStatus.set(id, 'saving');
+    this.saveError.delete(id);
     // textFor(), not currentAbcSource(): the latter lags behind the live edit by
     // up to the 400ms commit debounce, so saving right after typing could persist stale text.
     const input = { title: entry.title, data: this.textFor(entry), video: entry.video };
 
-    if (key.startsWith(MY_TUNES_PREFIX)) {
-      const record = await saveTune(key, input);
-      this.finishSave(key, record, (r) => libraryStore.applyNewTune(r));
-      return;
-    }
-    const record = await saveOverride(key, input);
-    this.finishSave(key, record, (r) => libraryStore.applyOverride(r));
-  }
-
-  private finishSave<T>(key: string, record: T | null, apply: (record: T) => void): void {
+    const record = await saveTune(id, input);
     runInAction(() => {
       if (!record) {
-        this.saveStatus.set(key, 'error');
-        this.saveError.set(key, 'Could not reach the server — your edit is still here, try again.');
+        this.saveStatus.set(id, 'error');
+        this.saveError.set(id, 'Could not reach the server — your edit is still here, try again.');
         return;
       }
-      apply(record);
-      this.clearLocalEdit(key);
-      this.saveStatus.set(key, 'saved');
+      libraryStore.applyTuneEdit(record);
+      this.clearLocalEdit(id);
+      this.saveStatus.set(id, 'saved');
     });
   }
 
-  private clearLocalEdit(key: string): void {
-    this.edits.delete(key);
-    this.committed.delete(key);
-    this.saveStatus.delete(key);
-    this.saveError.delete(key);
-    const existingTimer = this.commitDebounce.get(key);
+  private clearLocalEdit(id: string): void {
+    this.edits.delete(id);
+    this.committed.delete(id);
+    this.saveStatus.delete(id);
+    this.saveError.delete(id);
+    const existingTimer = this.commitDebounce.get(id);
     if (existingTimer) {
       clearTimeout(existingTimer);
-      this.commitDebounce.delete(key);
+      this.commitDebounce.delete(id);
     }
   }
 
-  private commit(entry: AbcData, text: string): void {
-    const key = keyFor(entry);
-    const original = entry.data ?? '';
-    if (text === original) this.committed.delete(key);
-    else this.committed.set(key, text);
-    this.commitDebounce.delete(key);
+  private commit(entry: TuneRecord, text: string): void {
+    const id = entry.id;
+    if (text === entry.data) this.committed.delete(id);
+    else this.committed.set(id, text);
+    this.commitDebounce.delete(id);
   }
 }
 
