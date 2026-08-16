@@ -92,8 +92,10 @@ export const TransportBar = observer(function TransportBar() {
         🔢
       </Button>
       <Button tooltip="Print"
+        disabled={!libraryStore.selected}
         onClick={() => {
           const entry = libraryStore.selected;
+          if (!entry) return;
           writePrintPayload(editorStore.currentAbcSource(entry), entry.title);
           window.open('/print', '_blank');
         }}
