@@ -19,14 +19,23 @@ const LibraryRow = observer(function LibraryRow({ node }: { node: LibraryNode })
   const commitRename = () => {
     const title = draftTitle.trim();
     setRenaming(false);
-    if (title && title !== node.title) void libraryStore.rename(node.id, title);
-    else setDraftTitle(node.title);
+    if (!title || title === node.title) {
+      setDraftTitle(node.title);
+      return;
+    }
+    void libraryStore.rename(node.id, title).then((ok) => {
+      if (!ok) {
+        alert('Could not rename — check the server is running and try again.');
+        setDraftTitle(node.title);
+      }
+    });
   };
 
   const handleDelete = async () => {
     if (!confirm(`Delete "${node.title}"?`)) return;
     const result = await libraryStore.remove(node.id);
     if (result === 'not-empty') alert('This folder isn\'t empty — remove its contents first.');
+    else if (result === 'error') alert('Could not delete — check the server is running and try again.');
   };
 
   if (renaming) {
@@ -97,18 +106,20 @@ export const Sidebar = observer(function Sidebar() {
     const title = newFolderTitle.trim();
     if (!title || creatingFolder) return;
     setCreatingFolder(true);
-    await libraryStore.createFolder(title);
+    const ok = await libraryStore.createFolder(title);
     setCreatingFolder(false);
-    setNewFolderTitle('');
+    if (ok) setNewFolderTitle('');
+    else alert('Could not create the folder — check the server is running and try again.');
   };
 
   const handleCreateTune = async () => {
     const title = newTuneTitle.trim();
     if (!title || creatingTune) return;
     setCreatingTune(true);
-    await libraryStore.createTune(title);
+    const created = await libraryStore.createTune(title);
     setCreatingTune(false);
-    setNewTuneTitle('');
+    if (created) setNewTuneTitle('');
+    else alert('Could not create the tune — check the server is running and try again.');
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {

@@ -154,12 +154,23 @@ describe('LibraryStore', () => {
     expect(seen).toEqual([['Renamed Outer', 'Inner']]);
   });
 
-  it('createFolder is a no-op locally when the API call fails', async () => {
+  it('createFolder returns true and adds the node locally on success', async () => {
+    const libraryStore = await freshStore([]);
+    const created = folder({ id: 'new-f', title: 'New Folder', parentId: null });
+    tunesClientMocks.createFolder.mockResolvedValue(created);
+
+    const result = await libraryStore.createFolder('New Folder');
+
+    expect(result).toBe(true);
+  });
+
+  it('createFolder is a no-op locally and returns false when the API call fails', async () => {
     const libraryStore = await freshStore([]);
     tunesClientMocks.createFolder.mockResolvedValue(null);
 
-    await libraryStore.createFolder('New Folder');
+    const result = await libraryStore.createFolder('New Folder');
 
+    expect(result).toBe(false);
     expect(libraryStore.childrenOf(null)).toEqual([]);
   });
 
@@ -175,16 +186,38 @@ describe('LibraryStore', () => {
     expect(libraryStore.childrenOf(null).map((n) => n.id)).toContain('new-t');
   });
 
+  it('createTune is a no-op locally and returns null when the API call fails', async () => {
+    const libraryStore = await freshStore([]);
+    tunesClientMocks.createTune.mockResolvedValue(null);
+
+    const result = await libraryStore.createTune('New Tune');
+
+    expect(result).toBeNull();
+    expect(libraryStore.childrenOf(null)).toEqual([]);
+  });
+
   it('rename on a folder calls renameFolder and patches the local node', async () => {
     const f = folder({ id: 'f1', title: 'Old Name' });
     const libraryStore = await freshStore([f]);
     const renamed = folder({ id: 'f1', title: 'New Name' });
     tunesClientMocks.renameFolder.mockResolvedValue(renamed);
 
-    await libraryStore.rename('f1', 'New Name');
+    const result = await libraryStore.rename('f1', 'New Name');
 
+    expect(result).toBe(true);
     expect(tunesClientMocks.renameFolder).toHaveBeenCalledWith('f1', { title: 'New Name' });
     expect(libraryStore.childrenOf(null).find((n) => n.id === 'f1')?.title).toBe('New Name');
+  });
+
+  it('rename returns false and leaves the node unchanged when the API call fails', async () => {
+    const f = folder({ id: 'f1', title: 'Old Name' });
+    const libraryStore = await freshStore([f]);
+    tunesClientMocks.renameFolder.mockResolvedValue(null);
+
+    const result = await libraryStore.rename('f1', 'New Name');
+
+    expect(result).toBe(false);
+    expect(libraryStore.childrenOf(null).find((n) => n.id === 'f1')?.title).toBe('Old Name');
   });
 
   it('rename on a tune calls saveTune with its existing data/video, and updates `selected` if it was selected', async () => {
@@ -231,6 +264,17 @@ describe('LibraryStore', () => {
     await libraryStore.remove('t1');
 
     expect(libraryStore.selected).toBeUndefined();
+  });
+
+  it('remove surfaces "error" and keeps the node locally when the API call fails', async () => {
+    const t = tune({ id: 't1', title: 'Tune', parentId: null });
+    const libraryStore = await freshStore([t]);
+    tunesClientMocks.deleteTune.mockResolvedValue(false);
+
+    const result = await libraryStore.remove('t1');
+
+    expect(result).toBe('error');
+    expect(libraryStore.childrenOf(null).map((n) => n.id)).toEqual(['t1']);
   });
 
   it('remove surfaces "not-empty" for a non-empty folder without deleting anything locally', async () => {

@@ -117,10 +117,11 @@ class LibraryStore {
     this.currentFolderId = tune.parentId;
   }
 
-  async createFolder(title: string): Promise<void> {
+  async createFolder(title: string): Promise<boolean> {
     const record = await apiCreateFolder({ parentId: this.currentFolderId, title });
-    if (!record) return;
+    if (!record) return false;
     runInAction(() => this.insertNode(record));
+    return true;
   }
 
   async createTune(title: string): Promise<TuneRecord | null> {
@@ -133,14 +134,15 @@ class LibraryStore {
     return record;
   }
 
-  async rename(id: string, title: string): Promise<void> {
+  async rename(id: string, title: string): Promise<boolean> {
     const node = this.nodesById.get(id);
-    if (!node) return;
+    if (!node) return false;
     const record = isFolder(node)
       ? await apiRenameFolder(id, { title })
       : await apiSaveTune(id, { title, data: node.data, video: node.video });
-    if (!record) return;
+    if (!record) return false;
     runInAction(() => this.replaceNode(record));
+    return true;
   }
 
   async remove(id: string): Promise<'deleted' | 'not-empty' | 'error'> {
