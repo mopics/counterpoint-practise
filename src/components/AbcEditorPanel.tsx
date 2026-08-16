@@ -1,13 +1,11 @@
-import type { AbcData } from '../content';
+import type { TuneRecord } from '../api/tunesClient';
 import type { SaveStatus } from '../stores/EditorStore';
 import { VideoLoopPanel } from './VideoLoopPanel';
 
 interface Props {
-  entry: AbcData;
+  entry: TuneRecord;
   value: string;
   edited: boolean;
-  /** True if this entry has a saved server override, even when there's no in-progress edit right now. */
-  hasOverride: boolean;
   saveStatus?: SaveStatus;
   saveError?: string;
   onChange: (text: string) => void;
@@ -15,8 +13,7 @@ interface Props {
   onSave: () => void;
 }
 
-export function AbcEditorPanel({ entry, value, edited, hasOverride, saveStatus, saveError, onChange, onReset, onSave }: Props) {
-  const canReset = edited || hasOverride;
+export function AbcEditorPanel({ entry, value, edited, saveStatus, saveError, onChange, onReset, onSave }: Props) {
   return (
     <div className="flex h-full min-h-0 flex-col border-l border-slate-200 bg-white">
       <div className="flex items-center gap-2 border-b border-slate-200 px-3 py-2">
@@ -43,11 +40,11 @@ export function AbcEditorPanel({ entry, value, edited, hasOverride, saveStatus, 
             Save
           </button>
         )}
-        {canReset && (
+        {edited && (
           <button
             type="button"
             onClick={onReset}
-            className={`text-xs text-slate-500 underline hover:text-slate-800 ${edited ? '' : 'ml-auto'}`}
+            className="text-xs text-slate-500 underline hover:text-slate-800"
           >
             Reset to original
           </button>
@@ -59,7 +56,7 @@ export function AbcEditorPanel({ entry, value, edited, hasOverride, saveStatus, 
         spellCheck={false}
         className="min-h-0 flex-1 resize-none p-3 font-mono text-sm text-slate-800 outline-none"
       />
-      <VideoLoopPanel key={entry.key ?? entry.id} entry={entry} />
+      <VideoLoopPanel key={entry.id} entry={entry} />
     </div>
   );
 }
