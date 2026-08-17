@@ -25,6 +25,38 @@ export const CHORD_ROW_HEIGHT = 20;
 export const STAFF_TOP_OFFSET = 34; // from top of a line's vertical band to its top staff line
 export const LINE_VERTICAL_GAP = 104; // vertical space allotted per rendered notation line
 
+// Chord-grip fretboard diagrams (always a fixed 6 strings x 6 fret rows).
+export const CHORD_GRIP_STRING_COUNT = 6;
+export const CHORD_GRIP_FRET_ROWS = 6;
+export const CHORD_GRIP_STRING_SPACING = 5; // px between adjacent string lines
+export const CHORD_GRIP_FRET_SPACING = 5; // px between adjacent fret lines
+export const CHORD_GRIP_WIDTH = CHORD_GRIP_STRING_SPACING * (CHORD_GRIP_STRING_COUNT - 1);
+export const CHORD_GRIP_GRID_HEIGHT = CHORD_GRIP_FRET_SPACING * CHORD_GRIP_FRET_ROWS;
+export const CHORD_GRIP_MUTE_OPEN_ROW_HEIGHT = 8; // space above the nut for x/o string indicators
+export const CHORD_GRIP_TOTAL_HEIGHT = CHORD_GRIP_MUTE_OPEN_ROW_HEIGHT + CHORD_GRIP_GRID_HEIGHT;
+
+// Layout variants used only for tunes that actually contain a chord grip
+// (checked once per tune, not per line — see SheetView.parseSheet) so tunes
+// without grips render pixel-identical to before this feature existed.
+const GRIP_TO_STAFF_GAP = 14; // clearance between the grip diagram's bottom and the staff
+// Clearance between the chord text baseline and the grip diagram's top edge. Deliberately
+// small/tight (previously effectively 13px via GRIP_TO_CHORD_GAP + CHORD_ROW_HEIGHT / 2) —
+// keep this above ~0 to avoid the text and diagram visually touching/overlapping.
+const GRIP_TO_CHORD_GAP = 2;
+const GRIP_EXTRA_SPACE = CHORD_GRIP_TOTAL_HEIGHT + GRIP_TO_STAFF_GAP + GRIP_TO_CHORD_GAP;
+export const STAFF_TOP_OFFSET_WITH_GRIPS = STAFF_TOP_OFFSET + GRIP_EXTRA_SPACE;
+// Trailing space between one line's staff and the next grip line's chord text is otherwise
+// LINE_VERTICAL_GAP + GRIP_EXTRA_SPACE — trimmed down per feedback (was too much top margin
+// above the chord text). This only affects inter-line spacing, not the room reserved above
+// each line's own staff (STAFF_TOP_OFFSET_WITH_GRIPS, left untouched on purpose).
+const GRIP_LINE_GAP_TRIM = 30;
+export const LINE_VERTICAL_GAP_WITH_GRIPS = LINE_VERTICAL_GAP + GRIP_EXTRA_SPACE - GRIP_LINE_GAP_TRIM;
+
+/** Top edge of the grip diagram, relative to staffTopY (only meaningful when a tune has grips). */
+export const CHORD_GRIP_Y_OFFSET = -(CHORD_GRIP_TOTAL_HEIGHT + GRIP_TO_STAFF_GAP);
+/** Chord text baseline, relative to staffTopY, for a line that has room reserved for grips below it. */
+export const CHORD_ROW_Y_OFFSET_WITH_GRIPS = CHORD_GRIP_Y_OFFSET - GRIP_TO_CHORD_GAP;
+
 export function pitchToY(pitch: number, staffBottomY: number): number {
   return staffBottomY - (pitch - BOTTOM_LINE_PITCH) * HALF_STEP;
 }

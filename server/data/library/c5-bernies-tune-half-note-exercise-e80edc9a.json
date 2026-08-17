@@ -1,0 +1,9 @@
+{
+  "id": "c5-bernies-tune-half-note-exercise-e80edc9a",
+  "type": "tune",
+  "parentId": "jazz-chord-craftmanship-e88e9361",
+  "title": "C5-Bernies Tune - Half note exercise",
+  "data": "T: Bernie's Tune - Halfnote exercise\nC: Jens Larsen\nK: F\nL:1/2\nQ:100\nT: A\n|:\"D-6\"$0-xx234x$[e=BF] $0-xx232x$ d |$0-xx235x$ [F=Bf] $0-xx234x$ e | \"Bb7\" [_Adg] f | [_Ade] f |\n\"E0\"[Gdg]e |\"A7\"[G^cf] e | \"D-6\" [F=Bd] e | \"E0\"[Gdg] \"A7\"[G^cf] |\nT:A\n\"D-6\"[F=Be]f | [=Bfg] a | \"Bb7\"[d_ab] c'| [d_ab] c' |\n\"E0\" [dgb] a | \"A7\"[^cgc'] b | \"D-6\" [=Bfa] g | \"C-7\" [B_ef] \"F7\"[Aeg] |\nT:B\n\"Bb^\"[Adg] f |\"C-7\"[B_eg] \"F7\"[Aea] |\"Bb^\"[Adg] f | \"C-7\"[B_ef] \"F7\"[Aeg] |\n\"Bb^\"[Adf] g |\"C-7\"[B_eg] \"F7\"[Aea] |\"Bb^\"[Adg] f | \"E0\"[Gde] \"A7\"[G^cf] |\nT:A\n\"D-6\"[F=Be] d | [F=Be] f | \"Bb7\"[_Adg] _a| [_Adg] f |\n\"E0\" [Gdg]e | \"A7\"[G^cf] e | \"D-6\" [F=Bd] e | \"E0\"[Gdg] \"A7\"[G^cf] :|\n\"D-6\" [F=Be] 2 ||",
+  "createdAt": "2026-08-17T06:32:36.403Z",
+  "updatedAt": "2026-08-17T10:42:03.102Z"
+}

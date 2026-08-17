@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as abcjs from 'abcjs';
 import { extractKeyMarkers } from '../abc/keyMarkers';
+import { extractChordGrips } from '../abc/chordGrips';
 import { readPrintPayload } from './printHandoff';
 
 export function PrintView() {
@@ -12,7 +13,8 @@ export function PrintView() {
 
     let cancelled = false;
     document.title = payload.title;
-    const { cleanAbc } = extractKeyMarkers(payload.abc);
+    const { cleanAbc: afterKeyMarkers } = extractKeyMarkers(payload.abc);
+    const { cleanAbc } = extractChordGrips(afterKeyMarkers);
     abcjs.renderAbc(containerRef.current, cleanAbc, { staffwidth: 680 });
 
     // Defer window.print() a frame so the browser has painted the rendered

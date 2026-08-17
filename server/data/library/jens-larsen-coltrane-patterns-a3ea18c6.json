@@ -3,12 +3,12 @@
   "type": "tune",
   "parentId": "jens-larsen-8a9a1dac",
   "title": "Jens Larsen - Coltrane Patterns",
-  "data": "X:1\nT: Jens Larsen - Coltrane Patterns\nC: Jens Larsen / Coltrane\nK: C\nQ:100\n\"C\" CDEG \"C-\" CD_EG |\n\"C\" CDEG \"F\"FGAc | \"G7\"GABd z4 |\n\"D-\" DEFA \"E-\" EFGB | \"A-\" ABce z4 |\nT: What to play over C^ (tonic). No F (so D- & F are of the table! )\nz4z4 | z4z4 | z4z4 | z4z4 | z4z4 |\n\"C^\"**G** GABd **C**cdeg | **A#** d'_d'c'^a **E**b=age-|e8 |\nabcd\n",
+  "data": "X:1\nT: Jens Larsen - Coltrane Patterns\nC: Jens Larsen / Coltrane\nK: C\nQ:100\n\"C\" CDEG \"C-\" CD_EG |\n\"C\" CDEG \"F\"FGAc | \"G7\"GABd z4 |\n\"D-\" DEFA \"E-\" EFGB | \"A-\" ABce z4 |\nT: What to play over C^ (tonic). No F (so D- & F are of the table! )\nz4z4 | z4z4 | z4z4 | z4z4 | z4z4 |\nT:3:00\n\"C^\"**G** GABd **C**cdeg | **A#** d'_d'c'^a **E**b=age-|e8 |\nT:3:29\nEGB_B Acde | gf^de c'eba | g e3-e4|\n",
   "video": {
     "url": "https://www.youtube.com/watch?v=RdQmZ5TRp3k",
     "start": "0:00",
     "end": "9:03"
   },
   "createdAt": "2026-08-16T06:56:38.147Z",
-  "updatedAt": "2026-08-16T06:57:00.000Z"
+  "updatedAt": "2026-08-16T14:01:45.466Z"
 }

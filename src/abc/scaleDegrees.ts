@@ -99,7 +99,8 @@ export function pitchClassOf(
  * so this reduces to skipping any (typically absent) leading whitespace and
  * returns `startChar` unchanged.
  */
-function noteOnsetChar(event: NotationEvent, cleanAbc: string): number {
+/** Shared with chordGrips.ts's computeChordGripOverlay, which faces the same event/marker-position problem. */
+export function noteOnsetChar(event: NotationEvent, cleanAbc: string): number {
   let pos = event.startChar;
   while (pos < cleanAbc.length && /\s/.test(cleanAbc[pos])) pos++;
   if (cleanAbc[pos] === '"') {

@@ -4,11 +4,13 @@ import { flattenTune } from '../abc/flatten';
 import type { EventRef, FlattenedTune } from '../abc/types';
 import { isEventInRange } from '../abc/eventRef';
 import { extractKeyMarkers } from '../abc/keyMarkers';
+import { extractChordGrips, computeChordGripOverlay, type ChordGripOverlay } from '../abc/chordGrips';
 import { computeScaleDegrees, type ScaleDegreeOverlay } from '../abc/scaleDegrees';
 import { layoutLine, type LineLayout } from './layout';
 import { Staff } from './Staff';
 import { PartLabel } from './PartLabel';
 import { ChordSymbolRow } from './ChordSymbolRow';
+import { ChordGripDiagram } from './ChordGripDiagram';
 import { BarLine } from './BarLine';
 import { NoteGlyph } from './NoteGlyph';
 import { RestGlyph } from './RestGlyph';
@@ -20,7 +22,16 @@ import { OrnamentGlyphs } from './Ornament';
 import { TieSlurLayer, computeSlurSpans, type SlurSpan } from './TieSlur';
 import { PlayCursorMarker } from './PlayCursor';
 import { SelectionOverlay } from './SelectionOverlay';
-import { CHORD_ROW_HEIGHT, LINE_VERTICAL_GAP, STAFF_HEIGHT, STAFF_TOP_OFFSET } from './geometry';
+import {
+  CHORD_GRIP_Y_OFFSET,
+  CHORD_ROW_HEIGHT,
+  CHORD_ROW_Y_OFFSET_WITH_GRIPS,
+  LINE_VERTICAL_GAP,
+  LINE_VERTICAL_GAP_WITH_GRIPS,
+  STAFF_HEIGHT,
+  STAFF_TOP_OFFSET,
+  STAFF_TOP_OFFSET_WITH_GRIPS,
+} from './geometry';
 
 interface Props {
   abcSource: string;
@@ -36,28 +47,40 @@ interface ParsedSheet {
   layouts: Map<number, LineLayout>;
   slurSpans: SlurSpan[];
   scaleDegrees: ScaleDegreeOverlay;
+  chordGrips: ChordGripOverlay;
+  hasGrips: boolean;
   width: number;
   height: number;
 }
 
 function parseSheet(abcSource: string): ParsedSheet {
-  const { cleanAbc, markers } = extractKeyMarkers(abcSource);
+  const { cleanAbc: afterKeyMarkers, markers } = extractKeyMarkers(abcSource);
+  const { cleanAbc, grips } = extractChordGrips(afterKeyMarkers);
   const tune = parseTune(cleanAbc);
   const flattened = flattenTune(tune);
   if (flattened.lines.length === 0) throw new Error('No parseable tune content');
   const scaleDegrees = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
+  const chordGrips = computeChordGripOverlay(flattened, grips, cleanAbc);
+
+  // Extra vertical space per line is reserved only for tunes that actually
+  // use a chord grip, so every tune that doesn't use this feature keeps
+  // rendering pixel-identical to before it existed.
+  const hasGrips = grips.length > 0;
+  const staffTopOffset = hasGrips ? STAFF_TOP_OFFSET_WITH_GRIPS : STAFF_TOP_OFFSET;
+  const lineVerticalGap = hasGrips ? LINE_VERTICAL_GAP_WITH_GRIPS : LINE_VERTICAL_GAP;
+
   const layouts = new Map<number, LineLayout>();
   let maxWidth = 0;
   flattened.lines.forEach((line, i) => {
-    const staffTopY = i * LINE_VERTICAL_GAP + STAFF_TOP_OFFSET;
+    const staffTopY = i * lineVerticalGap + staffTopOffset;
     const staffBottomY = staffTopY + STAFF_HEIGHT;
     const ll = layoutLine(line, staffTopY, staffBottomY);
     layouts.set(line.lineIndex, ll);
     maxWidth = Math.max(maxWidth, ll.contentWidth);
   });
   const slurSpans = computeSlurSpans(flattened.lines);
-  const height = flattened.lines.length * LINE_VERTICAL_GAP + 20;
-  return { flattened, layouts, slurSpans, scaleDegrees, width: maxWidth, height };
+  const height = flattened.lines.length * lineVerticalGap + 20;
+  return { flattened, layouts, slurSpans, scaleDegrees, chordGrips, hasGrips, width: maxWidth, height };
 }
 
 function hitTest(layouts: Map<number, LineLayout>, x: number, y: number): EventRef | null {
@@ -108,7 +131,7 @@ export const SheetView = memo(function SheetView({
       </div>
     );
   }
-  const { flattened, layouts, slurSpans, scaleDegrees, width, height } = parsed;
+  const { flattened, layouts, slurSpans, scaleDegrees, chordGrips, hasGrips, width, height } = parsed;
 
   const svgPoint = (e: React.PointerEvent<SVGSVGElement>): { x: number; y: number } => {
     const svg = e.currentTarget;
@@ -168,9 +191,16 @@ export const SheetView = memo(function SheetView({
               {ll.partLabel && <PartLabel label={ll.partLabel} staffTopY={ll.staffTopY} />}
               <ChordSymbolRow
                 events={ll.events}
-                y={ll.staffTopY - CHORD_ROW_HEIGHT / 2}
+                y={ll.staffTopY + (hasGrips ? CHORD_ROW_Y_OFFSET_WITH_GRIPS : -CHORD_ROW_HEIGHT / 2)}
                 rootHints={numeralMode ? scaleDegrees.lines[ll.lineIndex]?.rootHints : undefined}
               />
+              {hasGrips &&
+                ll.events.map((le) => {
+                  const grip = chordGrips.lines[ll.lineIndex]?.grips[le.eventIndex];
+                  return grip ? (
+                    <ChordGripDiagram key={`grip-${le.eventIndex}`} spec={grip} x={le.x} y={ll.staffTopY + CHORD_GRIP_Y_OFFSET} />
+                  ) : null;
+                })}
               {ll.bars.map((b, i) => (
                 <BarLine key={i} bar={b} staffTopY={ll.staffTopY} />
               ))}
