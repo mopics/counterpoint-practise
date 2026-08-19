@@ -56,6 +56,13 @@ interface ParsedSheet {
   hasGrips: boolean;
   compingVoice: CompingVoice | null;
   compingAlignment: CompingAlignment | null;
+  /**
+   * The per-tune vertical space allotted per rendered line — larger than the
+   * bare LINE_VERTICAL_GAP constant when the tune has grips and/or a comping
+   * voice. Carried here so hit-testing divides by the same value the layout
+   * was actually built with.
+   */
+  lineVerticalGap: number;
   width: number;
   height: number;
 }
@@ -68,7 +75,7 @@ function parseSheet(abcSource: string): ParsedSheet {
   if (flattened.lines.length === 0) throw new Error('No parseable tune content');
   const scaleDegrees = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
   const chordGrips = computeChordGripOverlay(flattened, grips, cleanAbc);
-  const compingVoice = extractCompingVoice(tune);
+  const compingVoice = extractCompingVoice(tune, cleanAbc);
   const compingAlignment = compingVoice ? alignCompingToGrips(compingVoice, flattened, chordGrips) : null;
 
   // Extra vertical space per line is reserved only for tunes that actually
@@ -91,11 +98,28 @@ function parseSheet(abcSource: string): ParsedSheet {
   });
   const slurSpans = computeSlurSpans(flattened.lines);
   const height = flattened.lines.length * lineVerticalGap + 20;
-  return { flattened, layouts, slurSpans, scaleDegrees, chordGrips, hasGrips, compingVoice, compingAlignment, width: maxWidth, height };
+  return {
+    flattened,
+    layouts,
+    slurSpans,
+    scaleDegrees,
+    chordGrips,
+    hasGrips,
+    compingVoice,
+    compingAlignment,
+    lineVerticalGap,
+    width: maxWidth,
+    height,
+  };
 }
 
-function hitTest(layouts: Map<number, LineLayout>, x: number, y: number): EventRef | null {
-  const lineIndex = Math.max(0, Math.min(layouts.size - 1, Math.floor(y / LINE_VERTICAL_GAP)));
+function hitTest(
+  layouts: Map<number, LineLayout>,
+  lineVerticalGap: number,
+  x: number,
+  y: number,
+): EventRef | null {
+  const lineIndex = Math.max(0, Math.min(layouts.size - 1, Math.floor(y / lineVerticalGap)));
   const layout = layouts.get(lineIndex);
   if (!layout || !layout.events.length) return null;
 
@@ -142,8 +166,19 @@ export const SheetView = memo(function SheetView({
       </div>
     );
   }
-  const { flattened, layouts, slurSpans, scaleDegrees, chordGrips, hasGrips, compingVoice, compingAlignment, width, height } =
-    parsed;
+  const {
+    flattened,
+    layouts,
+    slurSpans,
+    scaleDegrees,
+    chordGrips,
+    hasGrips,
+    compingVoice,
+    compingAlignment,
+    lineVerticalGap,
+    width,
+    height,
+  } = parsed;
 
   const svgPoint = (e: React.PointerEvent<SVGSVGElement>): { x: number; y: number } => {
     const svg = e.currentTarget;
@@ -154,7 +189,7 @@ export const SheetView = memo(function SheetView({
   const handlePointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
     if (!onSelectionChange) return;
     const { x, y } = svgPoint(e);
-    const ref = hitTest(layouts, x, y);
+    const ref = hitTest(layouts, lineVerticalGap, x, y);
     if (!ref) return;
     dragAnchor.current = ref;
     dragging.current = true;
@@ -165,7 +200,7 @@ export const SheetView = memo(function SheetView({
   const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
     if (!dragging.current || !onSelectionChange || !dragAnchor.current) return;
     const { x, y } = svgPoint(e);
-    const ref = hitTest(layouts, x, y);
+    const ref = hitTest(layouts, lineVerticalGap, x, y);
     if (!ref) return;
     onSelectionChange(dragAnchor.current, ref);
   };
@@ -217,6 +252,7 @@ export const SheetView = memo(function SheetView({
                 <ChordCompingRow
                   events={compingVoice.lines[ll.lineIndex]?.events ?? []}
                   grips={compingAlignment?.lines[ll.lineIndex]?.grips ?? []}
+                  melodyEvents={ll.events}
                   gripY={ll.staffBottomY + COMPING_GRIP_Y_OFFSET}
                   rhythmY={ll.staffBottomY + COMPING_RHYTHM_LINE_Y_OFFSET}
                 />
