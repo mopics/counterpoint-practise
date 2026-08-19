@@ -2,6 +2,7 @@
 import type { ChordGripSpec } from '../abc/chordGrips';
 import type { CompingEvent } from '../abc/chordComping';
 import { ChordGripDiagram } from './ChordGripDiagram';
+import type { LayoutEvent } from './layout';
 import {
   COMPING_STEM_LENGTH,
   DOT_GAP,
@@ -11,7 +12,6 @@ import {
   NOTE_RADIUS,
   PART_LABEL_WIDTH,
   dotCount,
-  eventWidth,
   flagCount,
   hasStem,
   isFilledNotehead,
@@ -21,6 +21,8 @@ interface Props {
   events: CompingEvent[];
   /** One entry per event in `events`, the chord grip active at that event (or null). */
   grips: (ChordGripSpec | null)[];
+  /** The already-laid-out melody events of this same rendered line, used as the x-axis reference. */
+  melodyEvents: LayoutEvent[];
   gripY: number;
   rhythmY: number;
 }
@@ -31,11 +33,46 @@ interface LaidOutEvent {
   grip: ChordGripSpec | null;
 }
 
-function layoutCompingEvents(events: CompingEvent[], grips: (ChordGripSpec | null)[]): LaidOutEvent[] {
-  let x = LEFT_MARGIN + PART_LABEL_WIDTH;
+/**
+ * Maps a time offset within this line onto the melody's own laid-out x axis,
+ * interpolating within whichever melody event covers that time. Computing an
+ * independent x walk here drifts from the melody, because layoutLine inserts
+ * BAR_PAD at every bar line and clamps short events to MIN_EVENT_WIDTH — so
+ * the comping strip has to read the melody's real positions instead.
+ *
+ * Deliberately uses nominal (uncompressed) durations: the melody's own layout
+ * is nominal-duration-based throughout and does not triplet-correct either, so
+ * staying nominal keeps the strip visually consistent with what's drawn above
+ * it. Triplet-multiplier scaling belongs only to the real-playback-time walk
+ * in alignCompingToGrips.
+ */
+export function interpolateX(localTime: number, melodyEvents: LayoutEvent[]): number {
+  let t = 0;
+  for (const me of melodyEvents) {
+    const dur = me.event.duration;
+    const isLast = me === melodyEvents[melodyEvents.length - 1];
+    if (localTime < t + dur || isLast) {
+      const frac = dur > 0 ? Math.min(1, Math.max(0, (localTime - t) / dur)) : 0;
+      return me.x + frac * me.width;
+    }
+    t += dur;
+  }
+  return melodyEvents.length > 0 ? melodyEvents[0].x : 0;
+}
+
+function layoutCompingEvents(
+  events: CompingEvent[],
+  grips: (ChordGripSpec | null)[],
+  melodyEvents: LayoutEvent[],
+): LaidOutEvent[] {
+  // Local time restarts at 0 on each rendered line, matching the melody
+  // layout this interpolates against (which is also per-line).
+  let localTime = 0;
   return events.map((event, i) => {
+    const x =
+      melodyEvents.length > 0 ? interpolateX(localTime, melodyEvents) : LEFT_MARGIN + PART_LABEL_WIDTH;
     const laid: LaidOutEvent = { x, event, grip: grips[i] ?? null };
-    x += eventWidth(event.duration);
+    localTime += event.duration;
     return laid;
   });
 }
@@ -118,8 +155,8 @@ function CompingRest({ x, y, duration }: { x: number; y: number; duration: numbe
 }
 
 /** One line's worth of the chord-comping voice: grip diagrams at each chord change, plus a single rhythm line beneath the staff. */
-export function ChordCompingRow({ events, grips, gripY, rhythmY }: Props) {
-  const laid = layoutCompingEvents(events, grips);
+export function ChordCompingRow({ events, grips, melodyEvents, gripY, rhythmY }: Props) {
+  const laid = layoutCompingEvents(events, grips, melodyEvents);
   return (
     <g>
       {laid.map((le, i) =>
@@ -128,10 +165,12 @@ export function ChordCompingRow({ events, grips, gripY, rhythmY }: Props) {
         ) : null,
       )}
       {laid.map((le, i) =>
-        le.event.kind === 'rest' ? (
-          <CompingRest key={`note-${i}`} x={le.x} y={rhythmY} duration={le.event.duration} />
-        ) : (
+        // A note with no active grip yet is silent in playback (expandCompingVoice
+        // splices it to a rest), so it must draw as a rest here too.
+        le.event.kind === 'note' && le.grip !== null ? (
           <CompingNote key={`note-${i}`} x={le.x} y={rhythmY} duration={le.event.duration} />
+        ) : (
+          <CompingRest key={`note-${i}`} x={le.x} y={rhythmY} duration={le.event.duration} />
         ),
       )}
     </g>
