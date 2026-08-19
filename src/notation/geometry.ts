@@ -57,6 +57,20 @@ export const CHORD_GRIP_Y_OFFSET = -(CHORD_GRIP_TOTAL_HEIGHT + GRIP_TO_STAFF_GAP
 /** Chord text baseline, relative to staffTopY, for a line that has room reserved for grips below it. */
 export const CHORD_ROW_Y_OFFSET_WITH_GRIPS = CHORD_GRIP_Y_OFFSET - GRIP_TO_CHORD_GAP;
 
+// Chord-comping row: drawn below the staff (unlike the melody-annotation
+// chord grips above it, which are unaffected by this feature and can still
+// render even on a tune that also has a comping voice — the two are
+// independent). Gap sized to keep the rhythm line's short stem clear of the
+// grip diagram above it.
+export const COMPING_GRIP_TO_STAFF_GAP = 10;
+export const COMPING_RHYTHM_TO_GRIP_GAP = 20;
+export const COMPING_RHYTHM_LINE_ALLOWANCE = 14;
+export const COMPING_STEM_LENGTH = 14; // shorter than the melody's STEM_LENGTH — this is a simplified single-line rhythm strip, not full staff notation
+export const COMPING_ROW_HEIGHT =
+  COMPING_GRIP_TO_STAFF_GAP + CHORD_GRIP_TOTAL_HEIGHT + COMPING_RHYTHM_TO_GRIP_GAP + COMPING_RHYTHM_LINE_ALLOWANCE;
+export const COMPING_GRIP_Y_OFFSET = COMPING_GRIP_TO_STAFF_GAP;
+export const COMPING_RHYTHM_LINE_Y_OFFSET = COMPING_GRIP_TO_STAFF_GAP + CHORD_GRIP_TOTAL_HEIGHT + COMPING_RHYTHM_TO_GRIP_GAP;
+
 export function pitchToY(pitch: number, staffBottomY: number): number {
   return staffBottomY - (pitch - BOTTOM_LINE_PITCH) * HALF_STEP;
 }
