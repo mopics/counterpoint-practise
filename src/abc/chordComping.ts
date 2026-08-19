@@ -1,4 +1,6 @@
 import type * as abcjs from 'abcjs';
+import type { FlattenedTune } from './types';
+import type { ChordGripOverlay, ChordGripSpec } from './chordGrips';
 
 export interface CompingEvent {
   kind: 'note' | 'rest';
@@ -62,4 +64,61 @@ export function extractCompingVoice(tune: abcjs.TuneObject): CompingVoice | null
     lineIndex++;
   }
   return { lines };
+}
+
+export interface CompingAlignmentLine {
+  grips: (ChordGripSpec | null)[];
+}
+
+export interface CompingAlignment {
+  lines: CompingAlignmentLine[];
+}
+
+/**
+ * For each V:2 comping event, finds the chord grip active at that moment in
+ * V:1 — "active" means the most recently written grip at or before the
+ * comping event's time position, held forward until the next one (a chord
+ * holds until the next chord symbol). Time position is cumulative `duration`
+ * from the tune's start, walked in written order across all lines (not real
+ * seconds, so it's tempo-independent) — both voices share one written bar
+ * structure, so this stays correct without unrolling repeats.
+ *
+ * `active` is intentionally declared outside the per-event loop and only
+ * reassigned when the melody-timeline pointer actually advances, so a grip
+ * correctly holds across several consecutive comping notes even when none of
+ * them coincide with a new V:1 event.
+ */
+export function alignCompingToGrips(
+  compingVoice: CompingVoice,
+  flattened: FlattenedTune,
+  chordGripOverlay: ChordGripOverlay,
+): CompingAlignment {
+  const melodyTimeline: { time: number; grip: ChordGripSpec | null }[] = [];
+  let melodyTime = 0;
+  flattened.lines.forEach((line, lineIndex) => {
+    line.events.forEach((event, eventIndex) => {
+      melodyTimeline.push({ time: melodyTime, grip: chordGripOverlay.lines[lineIndex]?.grips[eventIndex] ?? null });
+      melodyTime += event.duration;
+    });
+  });
+
+  const linesOut: CompingAlignmentLine[] = compingVoice.lines.map((line) => ({
+    grips: new Array<ChordGripSpec | null>(line.events.length).fill(null),
+  }));
+
+  let melodyIdx = 0;
+  let compingTime = 0;
+  let active: ChordGripSpec | null = null;
+  compingVoice.lines.forEach((line, lineIndex) => {
+    line.events.forEach((event, eventIndex) => {
+      while (melodyIdx < melodyTimeline.length && melodyTimeline[melodyIdx].time <= compingTime) {
+        active = melodyTimeline[melodyIdx].grip;
+        melodyIdx++;
+      }
+      linesOut[lineIndex].grips[eventIndex] = active;
+      compingTime += event.duration;
+    });
+  });
+
+  return { lines: linesOut };
 }
