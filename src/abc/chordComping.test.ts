@@ -58,7 +58,7 @@ describe('alignCompingToGrips', () => {
   });
 
   it('holds the same grip across multiple comping notes until the next one', () => {
-    const alignment = buildAlignment('X:1\nL:1/4\nK:C\nV:1\n$0-xx34xx$C4|\nV:2\nCCC|\n');
+    const alignment = buildAlignment('X:1\nK:C\nV:1\n$0-xx34xx$CDEF|\nV:2\nC2C2|C4|\n');
     expect(alignment.lines[0].grips).toEqual([
       { startFret: 0, frets: [null, null, 3, 4, null, null] },
       { startFret: 0, frets: [null, null, 3, 4, null, null] },

@@ -84,9 +84,11 @@ export interface CompingAlignment {
  * structure, so this stays correct without unrolling repeats.
  *
  * `active` is intentionally declared outside the per-event loop and only
- * reassigned when the melody-timeline pointer actually advances, so a grip
- * correctly holds across several consecutive comping notes even when none of
- * them coincide with a new V:1 event.
+ * updated when an actual grip-onset event is encountered (i.e., when the
+ * melody-timeline entry carries a non-null grip). This allows a held grip to
+ * survive walking past intervening melody events that carry no grip of their
+ * own, so a grip correctly persists across several consecutive comping notes
+ * even when none of them coincide with a new V:1 grip-onset event.
  */
 export function alignCompingToGrips(
   compingVoice: CompingVoice,
@@ -112,7 +114,7 @@ export function alignCompingToGrips(
   compingVoice.lines.forEach((line, lineIndex) => {
     line.events.forEach((event, eventIndex) => {
       while (melodyIdx < melodyTimeline.length && melodyTimeline[melodyIdx].time <= compingTime) {
-        active = melodyTimeline[melodyIdx].grip;
+        if (melodyTimeline[melodyIdx].grip !== null) active = melodyTimeline[melodyIdx].grip;
         melodyIdx++;
       }
       linesOut[lineIndex].grips[eventIndex] = active;
