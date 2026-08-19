@@ -5,12 +5,14 @@ import type { EventRef, FlattenedTune } from '../abc/types';
 import { isEventInRange } from '../abc/eventRef';
 import { extractKeyMarkers } from '../abc/keyMarkers';
 import { extractChordGrips, computeChordGripOverlay, type ChordGripOverlay } from '../abc/chordGrips';
+import { extractCompingVoice, alignCompingToGrips, type CompingVoice, type CompingAlignment } from '../abc/chordComping';
 import { computeScaleDegrees, type ScaleDegreeOverlay } from '../abc/scaleDegrees';
 import { layoutLine, type LineLayout } from './layout';
 import { Staff } from './Staff';
 import { PartLabel } from './PartLabel';
 import { ChordSymbolRow } from './ChordSymbolRow';
 import { ChordGripDiagram } from './ChordGripDiagram';
+import { ChordCompingRow } from './ChordCompingRow';
 import { BarLine } from './BarLine';
 import { NoteGlyph } from './NoteGlyph';
 import { RestGlyph } from './RestGlyph';
@@ -26,6 +28,9 @@ import {
   CHORD_GRIP_Y_OFFSET,
   CHORD_ROW_HEIGHT,
   CHORD_ROW_Y_OFFSET_WITH_GRIPS,
+  COMPING_GRIP_Y_OFFSET,
+  COMPING_RHYTHM_LINE_Y_OFFSET,
+  COMPING_ROW_HEIGHT,
   LINE_VERTICAL_GAP,
   LINE_VERTICAL_GAP_WITH_GRIPS,
   STAFF_HEIGHT,
@@ -49,6 +54,8 @@ interface ParsedSheet {
   scaleDegrees: ScaleDegreeOverlay;
   chordGrips: ChordGripOverlay;
   hasGrips: boolean;
+  compingVoice: CompingVoice | null;
+  compingAlignment: CompingAlignment | null;
   width: number;
   height: number;
 }
@@ -61,13 +68,17 @@ function parseSheet(abcSource: string): ParsedSheet {
   if (flattened.lines.length === 0) throw new Error('No parseable tune content');
   const scaleDegrees = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
   const chordGrips = computeChordGripOverlay(flattened, grips, cleanAbc);
+  const compingVoice = extractCompingVoice(tune);
+  const compingAlignment = compingVoice ? alignCompingToGrips(compingVoice, flattened, chordGrips) : null;
 
   // Extra vertical space per line is reserved only for tunes that actually
   // use a chord grip, so every tune that doesn't use this feature keeps
-  // rendering pixel-identical to before it existed.
+  // rendering pixel-identical to before it existed. A comping voice adds
+  // further room below the staff on top of that, only when present.
   const hasGrips = grips.length > 0;
   const staffTopOffset = hasGrips ? STAFF_TOP_OFFSET_WITH_GRIPS : STAFF_TOP_OFFSET;
-  const lineVerticalGap = hasGrips ? LINE_VERTICAL_GAP_WITH_GRIPS : LINE_VERTICAL_GAP;
+  const baseLineVerticalGap = hasGrips ? LINE_VERTICAL_GAP_WITH_GRIPS : LINE_VERTICAL_GAP;
+  const lineVerticalGap = compingVoice ? baseLineVerticalGap + COMPING_ROW_HEIGHT : baseLineVerticalGap;
 
   const layouts = new Map<number, LineLayout>();
   let maxWidth = 0;
@@ -80,7 +91,7 @@ function parseSheet(abcSource: string): ParsedSheet {
   });
   const slurSpans = computeSlurSpans(flattened.lines);
   const height = flattened.lines.length * lineVerticalGap + 20;
-  return { flattened, layouts, slurSpans, scaleDegrees, chordGrips, hasGrips, width: maxWidth, height };
+  return { flattened, layouts, slurSpans, scaleDegrees, chordGrips, hasGrips, compingVoice, compingAlignment, width: maxWidth, height };
 }
 
 function hitTest(layouts: Map<number, LineLayout>, x: number, y: number): EventRef | null {
@@ -131,7 +142,8 @@ export const SheetView = memo(function SheetView({
       </div>
     );
   }
-  const { flattened, layouts, slurSpans, scaleDegrees, chordGrips, hasGrips, width, height } = parsed;
+  const { flattened, layouts, slurSpans, scaleDegrees, chordGrips, hasGrips, compingVoice, compingAlignment, width, height } =
+    parsed;
 
   const svgPoint = (e: React.PointerEvent<SVGSVGElement>): { x: number; y: number } => {
     const svg = e.currentTarget;
@@ -201,6 +213,14 @@ export const SheetView = memo(function SheetView({
                     <ChordGripDiagram key={`grip-${le.eventIndex}`} spec={grip} x={le.x} y={ll.staffTopY + CHORD_GRIP_Y_OFFSET} />
                   ) : null;
                 })}
+              {compingVoice && (
+                <ChordCompingRow
+                  events={compingVoice.lines[ll.lineIndex]?.events ?? []}
+                  grips={compingAlignment?.lines[ll.lineIndex]?.grips ?? []}
+                  gripY={ll.staffBottomY + COMPING_GRIP_Y_OFFSET}
+                  rhythmY={ll.staffBottomY + COMPING_RHYTHM_LINE_Y_OFFSET}
+                />
+              )}
               {ll.bars.map((b, i) => (
                 <BarLine key={i} bar={b} staffTopY={ll.staffTopY} />
               ))}
