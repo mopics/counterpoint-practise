@@ -176,7 +176,10 @@ describe('expandTuneForPlayback', () => {
     const flattened = flattenTune(tune);
     const expanded = expandTuneForPlayback(cleanAbc, tune, grips, flattened);
     const reparsed = parseTune(expanded);
-    const v2Items = reparsed.lines[0].staff![1].voices[0] as unknown as { el_type: string; pitches?: unknown[] }[];
+    const v2Items = (reparsed.lines[0].staff?.[1]?.voices?.[0] ?? []) as unknown as {
+      el_type: string;
+      pitches?: unknown[];
+    }[];
     const noteItem = v2Items.find((it) => it.el_type === 'note');
     // Exact pitch-letter assertions belong to the 'splices a chord cluster' test above
     // (via the raw spliced text) — here we only need to confirm the round-trip through
