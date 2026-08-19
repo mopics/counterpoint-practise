@@ -23,6 +23,9 @@ export function PrintView() {
     const finalAbc = expandTuneForPlayback(cleanAbc, tune, grips, flattened);
     abcjs.renderAbc(containerRef.current, finalAbc, { staffwidth: 680 });
 
+    // Defer window.print() a frame so the browser has painted the rendered
+    // notation first — calling it synchronously right after renderAbc risks
+    // an unpainted/blank print preview in some browsers.
     const rafHandle = requestAnimationFrame(() => {
       if (!cancelled) window.print();
     });

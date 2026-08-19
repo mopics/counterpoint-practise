@@ -83,6 +83,11 @@ class SynthEngine {
   async load(abcSource: string): Promise<FlattenedTune> {
     this.teardown();
 
+    // Strip **K** key-root markers and $...$ chord-grip markers before
+    // handing the source to abcjs, same as SheetView.tsx's parseSheet() —
+    // otherwise abcjs parses the leftover marker text as real
+    // notes/characters, desyncing this timing table's event sequence from
+    // the one actually rendered on screen.
     const { cleanAbc: afterKeyMarkers } = extractKeyMarkers(abcSource);
     const { cleanAbc, grips } = extractChordGrips(afterKeyMarkers);
     const parsedTune = parseTune(cleanAbc);
