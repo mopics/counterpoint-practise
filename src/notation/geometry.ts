@@ -9,6 +9,8 @@ export const STAFF_LINE_COUNT = 5;
 export const STAFF_HEIGHT = LINE_SPACING * (STAFF_LINE_COUNT - 1);
 
 export const NOTE_RADIUS = 4.2;
+export const DOT_RADIUS = 1.4;
+export const DOT_GAP = 3.5; // px between the notehead/rest edge and the first dot, and between dots
 export const STEM_LENGTH = LINE_SPACING * 3.5;
 export const FLAG_GAP = 5;
 
@@ -75,6 +77,11 @@ export function pitchToY(pitch: number, staffBottomY: number): number {
   return staffBottomY - (pitch - BOTTOM_LINE_PITCH) * HALF_STEP;
 }
 
+/** True when a pitch falls on a staff line rather than in a space (including ledger lines). */
+export function isOnStaffLine(pitch: number): boolean {
+  return (pitch - BOTTOM_LINE_PITCH) % 2 === 0;
+}
+
 export function eventWidth(duration: number): number {
   return Math.max(MIN_EVENT_WIDTH, duration * UNIT_WIDTH);
 }
@@ -85,6 +92,26 @@ export function flagCount(duration: number): number {
   if (duration >= 0.125) return 1;
   if (duration >= 0.0625) return 2;
   return 3;
+}
+
+const DOT_TOLERANCE = 1e-6;
+
+/**
+ * Number of augmentation dots implied by a raw duration fraction. abcjs
+ * doesn't expose an explicit "dotted" flag on parsed notes, so this is
+ * derived from the value itself: a single dot multiplies some power-of-2
+ * base duration by 1.5, a double dot by 1.75. Both land on exactly
+ * representable fractions (denominators stay powers of 2), so float
+ * comparison is safe here; the tolerance only guards against drift from
+ * anything upstream that isn't already an exact fraction (e.g. a triplet's
+ * 1/3 duration, which must NOT be mistaken for a dot).
+ */
+export function dotCount(duration: number): number {
+  for (let base = 1; base >= 1 / 128; base /= 2) {
+    if (Math.abs(duration - base * 1.75) < DOT_TOLERANCE) return 2;
+    if (Math.abs(duration - base * 1.5) < DOT_TOLERANCE) return 1;
+  }
+  return 0;
 }
 
 export function isFilledNotehead(duration: number): boolean {

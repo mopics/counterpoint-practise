@@ -1,10 +1,15 @@
 import {
+  DOT_GAP,
+  DOT_RADIUS,
   FLAG_GAP,
+  HALF_STEP,
   NOTE_RADIUS,
   STEM_LENGTH,
+  dotCount,
   flagCount,
   hasStem,
   isFilledNotehead,
+  isOnStaffLine,
   ledgerLinePitches,
   pitchToY,
 } from './geometry';
@@ -66,6 +71,7 @@ export function NoteGlyph({ x, pitches, duration, staffBottomY, noteheadStyle, b
   const filled = isFilledNotehead(duration);
   const stemmed = hasStem(duration);
   const flags = !beamed ? flagCount(duration) : 0;
+  const dots = dotCount(duration);
 
   const minPitch = Math.min(...pitches.map((p) => p.pitch));
   const maxPitch = Math.max(...pitches.map((p) => p.pitch));
@@ -135,6 +141,19 @@ export function NoteGlyph({ x, pitches, duration, staffBottomY, noteheadStyle, b
             ) : (
               <NoteHead cx={x} cy={y} filled={filled} style={noteheadStyle} selected={selected} />
             )}
+            {!degree &&
+              dots > 0 &&
+              Array.from({ length: dots }).map((_, dotIndex) => (
+                <circle
+                  key={dotIndex}
+                  cx={x + NOTE_RADIUS + DOT_GAP + dotIndex * (2 * DOT_RADIUS + DOT_GAP)}
+                  // A dot sitting exactly on a staff line reads as part of the line, so nudge
+                  // it up into the space above; a dot already in a space stays level with the notehead.
+                  cy={isOnStaffLine(p.pitch) ? y - HALF_STEP : y}
+                  r={DOT_RADIUS}
+                  fill={color}
+                />
+              ))}
           </g>
         );
       })}
