@@ -16,6 +16,25 @@ function isFolder(node: LibraryNode): node is FolderRecord {
   return node.type === 'folder';
 }
 
+const LAST_SELECTED_TUNE_ID_KEY = 'lastSelectedTuneId';
+
+function loadLastSelectedTuneId(): string | null {
+  try {
+    return localStorage.getItem(LAST_SELECTED_TUNE_ID_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function persistSelectedTuneId(id: string | null): void {
+  try {
+    if (id === null) localStorage.removeItem(LAST_SELECTED_TUNE_ID_KEY);
+    else localStorage.setItem(LAST_SELECTED_TUNE_ID_KEY, id);
+  } catch {
+    // ignore persistence failures (e.g. private browsing / storage disabled)
+  }
+}
+
 function byTitle(a: LibraryNode, b: LibraryNode): number {
   return a.title.localeCompare(b.title);
 }
@@ -73,7 +92,10 @@ class LibraryStore {
       this.loadError = false;
       this.loaded = true;
       this.rebuildIndexes(listing.nodes);
-      const first = firstTuneDepthFirst(null, this.childrenByParent);
+      const persistedId = loadLastSelectedTuneId();
+      const persisted = persistedId ? this.nodesById.get(persistedId) : undefined;
+      const restored = persisted && persisted.type === 'tune' ? persisted : undefined;
+      const first = restored ?? firstTuneDepthFirst(null, this.childrenByParent);
       this.selected = first;
       this.currentFolderId = first ? first.parentId : null;
     });
@@ -115,6 +137,7 @@ class LibraryStore {
   setSelected(tune: TuneRecord): void {
     this.selected = tune;
     this.currentFolderId = tune.parentId;
+    persistSelectedTuneId(tune.id);
   }
 
   async createFolder(title: string): Promise<boolean> {
@@ -192,6 +215,7 @@ class LibraryStore {
       const replacement = firstTuneDepthFirst(null, this.childrenByParent);
       this.selected = replacement;
       if (replacement) this.currentFolderId = replacement.parentId;
+      persistSelectedTuneId(replacement ? replacement.id : null);
     }
   }
 }

@@ -24,6 +24,7 @@ function tune(overrides: Partial<TuneRecord> & { id: string; title: string }): T
 describe('LibraryStore', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
   async function freshStore(nodes: (FolderRecord | TuneRecord)[]) {
@@ -287,6 +288,62 @@ describe('LibraryStore', () => {
 
     expect(result).toBe('not-empty');
     expect(libraryStore.childrenOf(null).map((n) => n.id)).toContain('f1');
+  });
+
+  it('setSelected persists the tune id to localStorage', async () => {
+    const f = folder({ id: 'f1', title: 'Folder' });
+    const t = tune({ id: 't1', title: 'Tune', parentId: 'f1' });
+    const libraryStore = await freshStore([f, t]);
+
+    libraryStore.setSelected(t);
+
+    expect(localStorage.getItem('lastSelectedTuneId')).toBe('t1');
+  });
+
+  it('restores the persisted tune as selected on load, overriding the depth-first default', async () => {
+    localStorage.setItem('lastSelectedTuneId', 't2');
+    const t1 = tune({ id: 't1', title: 'A Tune', parentId: null });
+    const t2 = tune({ id: 't2', title: 'Z Tune', parentId: null });
+    const libraryStore = await freshStore([t1, t2]);
+
+    expect(libraryStore.selected?.id).toBe('t2');
+    expect(libraryStore.currentFolderId).toBe(null);
+  });
+
+  it('falls back to the depth-first default when the persisted tune id no longer exists', async () => {
+    localStorage.setItem('lastSelectedTuneId', 'does-not-exist');
+    const t = tune({ id: 't1', title: 'Only Tune', parentId: null });
+    const libraryStore = await freshStore([t]);
+
+    expect(libraryStore.selected?.id).toBe('t1');
+  });
+
+  it('falls back to the depth-first default when nothing is persisted', async () => {
+    const t = tune({ id: 't1', title: 'Only Tune', parentId: null });
+    const libraryStore = await freshStore([t]);
+
+    expect(libraryStore.selected?.id).toBe('t1');
+  });
+
+  it("remove()'s auto-reselect persists the new selection", async () => {
+    const t1 = tune({ id: 't1', title: 'A Tune', parentId: null });
+    const t2 = tune({ id: 't2', title: 'B Tune', parentId: null });
+    const libraryStore = await freshStore([t1, t2]);
+    tunesClientMocks.deleteTune.mockResolvedValue(true);
+
+    await libraryStore.remove('t1');
+
+    expect(localStorage.getItem('lastSelectedTuneId')).toBe('t2');
+  });
+
+  it('remove() on the last tune clears the persisted selection', async () => {
+    const t1 = tune({ id: 't1', title: 'Only Tune', parentId: null });
+    const libraryStore = await freshStore([t1]);
+    tunesClientMocks.deleteTune.mockResolvedValue(true);
+
+    await libraryStore.remove('t1');
+
+    expect(localStorage.getItem('lastSelectedTuneId')).toBeNull();
   });
 
   it('applyTuneEdit patches the node in place and updates `selected` when it matches', async () => {
