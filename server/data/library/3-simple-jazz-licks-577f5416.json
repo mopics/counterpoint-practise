@@ -1,0 +1,9 @@
+{
+  "id": "3-simple-jazz-licks-577f5416",
+  "type": "tune",
+  "parentId": "jens-larsen-8a9a1dac",
+  "title": "3 simple Jazz Licks",
+  "data": "X:1\nT: 3 Simple Jazz Licks\nQ:200\nM:4/4\nL:1/8\nK:Bb\nV:1\n\"G-6\" dcB_G =G4\nV:comp\n$0-312333$ c z $0-312333$ c z4",
+  "createdAt": "2026-08-23T07:38:44.828Z",
+  "updatedAt": "2026-08-23T08:53:13.666Z"
+}
