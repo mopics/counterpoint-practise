@@ -22,7 +22,14 @@ import { extractCompingVoice } from './chordComping';
  */
 const LIBRARY_DIR = path.resolve(process.cwd(), 'server', 'data', 'library');
 
-const files = readdirSync(LIBRARY_DIR).filter((f) => f.endsWith('.json'));
+// Tunes intentionally authored with a real V:comp chord-comping voice —
+// excluded from the "detection stays off" assertion below, per this file's
+// own doc comment.
+const KNOWN_COMPING_TUNES = new Set(['minor6-tune-d97b905b.json', '3-simple-jazz-licks-577f5416.json']);
+
+const files = readdirSync(LIBRARY_DIR)
+  .filter((f) => f.endsWith('.json'))
+  .filter((f) => !KNOWN_COMPING_TUNES.has(f));
 
 describe('extractCompingVoice against the real content library', () => {
   it('finds library files to check (guards against a silently empty suite)', () => {

@@ -1,7 +1,7 @@
 import type * as abcjs from 'abcjs';
 import type { FlattenedTune } from './types';
-import type { ChordGripOverlay, ChordGripSpec, ChordGripMarker } from './chordGrips';
-import { computeChordGripOverlay } from './chordGrips';
+import type { ChordGripSpec, ChordGripMarker } from './chordGrips';
+import { noteOnsetChar } from './scaleDegrees';
 
 export interface CompingEvent {
   kind: 'note' | 'rest';
@@ -110,64 +110,123 @@ export interface CompingAlignment {
   lines: CompingAlignmentLine[];
 }
 
+interface OnsetEntry {
+  onsetChar: number;
+  time: number;
+}
+
 /**
- * For each comping-voice event, finds the chord grip active at that moment in
- * V:1 — "active" means the most recently written grip at or before the
- * comping event's time position, held forward until the next one (a chord
- * holds until the next chord symbol). Time position is cumulative `duration`
- * from the tune's start, walked in written order across all lines (not real
- * seconds, so it's tempo-independent) — both voices share one written bar
- * structure, so this stays correct without unrolling repeats.
- *
- * `active` is intentionally declared outside the per-event loop and only
- * updated when an actual grip-onset event is encountered (i.e., when the
- * melody-timeline entry carries a non-null grip). This allows a held grip to
- * survive walking past intervening melody events that carry no grip of their
- * own, so a grip correctly persists across several consecutive comping notes
- * even when none of them coincide with a new V:1 grip-onset event.
- *
- * Both time walks apply each event's triplet multiplier, because abcjs's
+ * Walks a voice's flattened events in written order, pairing each with its
+ * text position (`onsetChar`) and its time position (cumulative `duration`
+ * from the tune's start, not real seconds — tempo-independent). Applies each
+ * event's triplet multiplier when accumulating time, because abcjs's
  * `duration` is the nominal (written) value — a triplet's three notes each
  * report their uncompressed duration, so summing them raw over-counts the
- * group's real span and drifts every later event's time position. The
- * multiplier is carried on the group's first event and stays active until the
- * event flagged `tripletEnd`.
+ * group's real span. The multiplier is carried on the group's first event and
+ * stays active until the event flagged `tripletEnd`.
+ */
+function buildOnsetTimeline<T extends { duration: number; tripletStart?: { multiplier: number }; tripletEnd: boolean }>(
+  events: T[],
+  onsetCharOf: (event: T) => number,
+): OnsetEntry[] {
+  const onsets: OnsetEntry[] = [];
+  let time = 0;
+  let multiplier = 1;
+  for (const event of events) {
+    onsets.push({ onsetChar: onsetCharOf(event), time });
+    if (event.tripletStart) multiplier = event.tripletStart.multiplier;
+    time += event.duration * multiplier;
+    if (event.tripletEnd) multiplier = 1;
+  }
+  return onsets;
+}
+
+/** The earliest onset (by text position) at or after `charOffset`, in a list already sorted by `onsetChar`. */
+function nearestFollowingOnset(charOffset: number, onsets: OnsetEntry[]): OnsetEntry | undefined {
+  for (const onset of onsets) {
+    if (onset.onsetChar >= charOffset) return onset;
+  }
+  return undefined;
+}
+
+/**
+ * For each comping-voice event, finds the chord grip active at that moment —
+ * "active" means the most recently attached grip at or before the comping
+ * event's time position, held forward until the next one (a chord holds
+ * until the next chord symbol).
+ *
+ * A grip marker attaches to the nearest event it directly precedes in the
+ * source text, considering BOTH voices, not melody only: a grip can be
+ * written near a melody note (annotating the existing chord-grip feature, as
+ * originally designed) or written directly inline in the comping voice's own
+ * line — the more natural place to put a comping-specific chord change, and
+ * the only option when the comping voice's text comes after all of the
+ * melody's, since then no melody event exists for the grip to attach to at
+ * all. Attachment itself happens in TEXT order (matching the existing
+ * `$grip$` marker convention elsewhere), but a grip embedded in the comping
+ * voice's own late-in-the-text block can have an early TIME position (e.g.
+ * the comping voice's very first note) — so once every grip has been resolved
+ * to the event it attaches to, the resulting `time`s are re-sorted before the
+ * "hold until next" walk below, rather than assuming text order already
+ * matches time order across voices.
  */
 export function alignCompingToGrips(
   compingVoice: CompingVoice,
   flattened: FlattenedTune,
-  chordGripOverlay: ChordGripOverlay,
+  grips: ChordGripMarker[],
+  cleanAbc: string,
 ): CompingAlignment {
-  const melodyTimeline: { time: number; grip: ChordGripSpec | null }[] = [];
-  let melodyTime = 0;
-  let melodyMultiplier = 1;
-  flattened.lines.forEach((line, lineIndex) => {
-    line.events.forEach((event, eventIndex) => {
-      melodyTimeline.push({ time: melodyTime, grip: chordGripOverlay.lines[lineIndex]?.grips[eventIndex] ?? null });
-      if (event.tripletStart) melodyMultiplier = event.tripletStart.multiplier;
-      melodyTime += event.duration * melodyMultiplier;
-      if (event.tripletEnd) melodyMultiplier = 1;
-    });
-  });
+  // Written order (same order buildOnsetTimeline iterated in) — `compingOnsets`
+  // must stay in this order since the final walk below reuses it by flatIdx,
+  // paired with `compingVoice.lines.forEach`'s own written-order walk.
+  const melodyEvents = flattened.lines.flatMap((line) => line.events);
+  const melodyOnsets = buildOnsetTimeline(melodyEvents, (event) => noteOnsetChar(event, cleanAbc));
+  const compingEvents = compingVoice.lines.flatMap((line) => line.events);
+  // Not just event.startChar: abcjs anchors a note's startChar at the start
+  // of whatever immediately precedes it once blanked to whitespace — for
+  // melody notes that's a chord-symbol annotation (why noteOnsetChar exists
+  // at all); for comping notes it's just as often a blanked-out $grip$
+  // marker sitting right before it, which needs the exact same whitespace
+  // skip to land on the note's real onset rather than the marker's old spot.
+  const compingOnsets = buildOnsetTimeline(compingEvents, (event) => noteOnsetChar(event, cleanAbc));
+
+  // Separate, sorted-by-onsetChar copies for nearestFollowingOnset's search —
+  // onset chars are already monotonic within one voice's own written order in
+  // practice, but sorting a copy (rather than the arrays above) keeps that an
+  // implementation detail of the search, not a hidden requirement on the
+  // flatIdx correspondence the final walk depends on.
+  const melodyOnsetsByChar = [...melodyOnsets].sort((a, b) => a.onsetChar - b.onsetChar);
+  const compingOnsetsByChar = [...compingOnsets].sort((a, b) => a.onsetChar - b.onsetChar);
+
+  const sortedGrips = [...grips].sort((a, b) => a.charOffset - b.charOffset);
+  const attachedGrips: { time: number; spec: ChordGripSpec }[] = [];
+  for (const grip of sortedGrips) {
+    const melodyMatch = nearestFollowingOnset(grip.charOffset, melodyOnsetsByChar);
+    const compingMatch = nearestFollowingOnset(grip.charOffset, compingOnsetsByChar);
+    const winner =
+      melodyMatch && compingMatch
+        ? (melodyMatch.onsetChar <= compingMatch.onsetChar ? melodyMatch : compingMatch)
+        : (melodyMatch ?? compingMatch);
+    if (winner) attachedGrips.push({ time: winner.time, spec: grip.spec });
+  }
+  attachedGrips.sort((a, b) => a.time - b.time);
 
   const linesOut: CompingAlignmentLine[] = compingVoice.lines.map((line) => ({
     grips: new Array<ChordGripSpec | null>(line.events.length).fill(null),
   }));
 
-  let melodyIdx = 0;
-  let compingTime = 0;
-  let compingMultiplier = 1;
+  let gripIdx = 0;
   let active: ChordGripSpec | null = null;
+  let flatIdx = 0;
   compingVoice.lines.forEach((line, lineIndex) => {
-    line.events.forEach((event, eventIndex) => {
-      while (melodyIdx < melodyTimeline.length && melodyTimeline[melodyIdx].time <= compingTime + TIME_EPSILON) {
-        if (melodyTimeline[melodyIdx].grip !== null) active = melodyTimeline[melodyIdx].grip;
-        melodyIdx++;
+    line.events.forEach((_event, eventIndex) => {
+      const compingTime = compingOnsets[flatIdx].time;
+      while (gripIdx < attachedGrips.length && attachedGrips[gripIdx].time <= compingTime + TIME_EPSILON) {
+        active = attachedGrips[gripIdx].spec;
+        gripIdx++;
       }
       linesOut[lineIndex].grips[eventIndex] = active;
-      if (event.tripletStart) compingMultiplier = event.tripletStart.multiplier;
-      compingTime += event.duration * compingMultiplier;
-      if (event.tripletEnd) compingMultiplier = 1;
+      flatIdx++;
     });
   });
 
@@ -232,13 +291,22 @@ function durationSuffixOf(sourceText: string): string | null {
  * from the original. Already-rest events are left untouched; a note event with
  * no active grip (or only a fully-muted one) becomes a plain rest; a note
  * whose source text isn't a plain pitch token is skipped entirely.
+ *
+ * Slices from noteOnsetChar, not the raw startChar: a note directly after a
+ * blanked $grip$ marker has its startChar anchored back at the marker's old
+ * position (the same quirk noteOnsetChar exists to correct for melody notes
+ * after a chord-symbol annotation), so the raw slice would begin with
+ * leading whitespace — durationSuffixOf's anchored pitch-token match would
+ * then always fail and silently skip the edit, leaving the placeholder pitch
+ * in the text actually sent to playback/print.
  */
 export function expandCompingVoice(cleanAbc: string, compingVoice: CompingVoice, alignment: CompingAlignment): string {
   const edits: { startChar: number; endChar: number; replacement: string }[] = [];
   compingVoice.lines.forEach((line, lineIndex) => {
     line.events.forEach((event, eventIndex) => {
       if (event.kind === 'rest') return;
-      const original = cleanAbc.slice(event.startChar, event.endChar);
+      const onsetChar = noteOnsetChar(event, cleanAbc);
+      const original = cleanAbc.slice(onsetChar, event.endChar);
       const durationSuffix = durationSuffixOf(original);
       // Not a plain pitch token (slur paren, decoration, grace group, chord
       // bracket, …) — leave it exactly as authored rather than emitting a
@@ -247,7 +315,7 @@ export function expandCompingVoice(cleanAbc: string, compingVoice: CompingVoice,
       const grip = alignment.lines[lineIndex]?.grips[eventIndex] ?? null;
       const cluster = grip ? chordClusterAbc(grip) : null;
       const replacement = (cluster ?? 'z') + durationSuffix;
-      edits.push({ startChar: event.startChar, endChar: event.endChar, replacement });
+      edits.push({ startChar: onsetChar, endChar: event.endChar, replacement });
     });
   });
 
@@ -272,7 +340,6 @@ export function expandTuneForPlayback(
 ): string {
   const compingVoice = extractCompingVoice(tune, cleanAbc);
   if (!compingVoice) return cleanAbc;
-  const chordGripOverlay = computeChordGripOverlay(flattened, grips, cleanAbc);
-  const alignment = alignCompingToGrips(compingVoice, flattened, chordGripOverlay);
+  const alignment = alignCompingToGrips(compingVoice, flattened, grips, cleanAbc);
   return expandCompingVoice(cleanAbc, compingVoice, alignment);
 }

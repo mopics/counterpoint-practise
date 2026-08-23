@@ -1,5 +1,5 @@
 import type { AccidentalName } from 'abcjs';
-import type { FlattenedTune, NotationEvent, NotationPitch } from './types';
+import type { FlattenedTune, NotationPitch } from './types';
 import type { KeyMarker } from './keyMarkers';
 
 const NOTE_LETTER_PC: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
@@ -99,8 +99,15 @@ export function pitchClassOf(
  * so this reduces to skipping any (typically absent) leading whitespace and
  * returns `startChar` unchanged.
  */
-/** Shared with chordGrips.ts's computeChordGripOverlay, which faces the same event/marker-position problem. */
-export function noteOnsetChar(event: NotationEvent, cleanAbc: string): number {
+/**
+ * Shared with chordGrips.ts's computeChordGripOverlay and chordComping.ts's
+ * alignCompingToGrips, which all face the same event/marker-position problem
+ * — including comping-voice events, whose notes can equally sit right after
+ * a blanked `$grip$` marker's whitespace run, not just melody notes after a
+ * chord-symbol annotation. Only `startChar` is read, so any event shape that
+ * has one works, not just NotationEvent.
+ */
+export function noteOnsetChar(event: { startChar: number }, cleanAbc: string): number {
   let pos = event.startChar;
   while (pos < cleanAbc.length && /\s/.test(cleanAbc[pos])) pos++;
   if (cleanAbc[pos] === '"') {

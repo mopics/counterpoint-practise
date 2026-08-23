@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { parseTune } from './parseTune';
 import { extractCompingVoice, alignCompingToGrips } from './chordComping';
 import { flattenTune } from './flatten';
-import { extractChordGrips, computeChordGripOverlay } from './chordGrips';
+import { extractChordGrips } from './chordGrips';
 import { expandCompingVoice, expandTuneForPlayback, gripToMidiNotes, midiToAbcNote } from './chordComping';
 
 describe('extractCompingVoice', () => {
@@ -62,9 +62,8 @@ function buildAlignment(raw: string) {
   const { cleanAbc, grips } = extractChordGrips(raw);
   const tune = parseTune(cleanAbc);
   const flattened = flattenTune(tune);
-  const chordGripOverlay = computeChordGripOverlay(flattened, grips, cleanAbc);
   const compingVoice = extractCompingVoice(tune, cleanAbc)!;
-  return alignCompingToGrips(compingVoice, flattened, chordGripOverlay);
+  return alignCompingToGrips(compingVoice, flattened, grips, cleanAbc);
 }
 
 describe('alignCompingToGrips', () => {
@@ -113,6 +112,29 @@ describe('alignCompingToGrips', () => {
     const gripA = { startFret: 0, frets: [null, null, 3, 4, null, null] };
     const gripB = { startFret: 3, frets: [0, 1, 2, 3, 4, 5] };
     expect(alignment.lines[0].grips).toEqual([gripA, gripA, gripB]);
+  });
+
+  it('attaches a grip embedded directly in the comping voice line to the nearest comping event, when no V:1 event follows it in the text', () => {
+    // Reproduces a real reported bug: when V:1 appears once, entirely before
+    // V:comp, a grip physically written inside V:comp (a natural place to put
+    // one) has no following V:1 event to attach to under the old melody-only
+    // attachment, so it was silently dropped and no chord ever rendered.
+    const alignment = buildAlignment('X:1\nK:C\nV:1\nCDEF|\nV:comp\n$0-312333$C8\n');
+    expect(alignment.lines[0].grips[0]).toEqual({ startFret: 0, frets: [3, 1, 2, 3, 3, 3] });
+  });
+
+  it('attaches a grip to the note directly after it in the comping voice, not the rest after that', () => {
+    // Reproduces a real reported bug: abcjs anchors a note's startChar at the
+    // start of whatever immediately precedes it once blanked to whitespace —
+    // for a comping note that's often a blanked-out $grip$ marker sitting
+    // right before it. Without adjusting for that (the same fix noteOnsetChar
+    // already applies for a melody note after a chord-symbol annotation), the
+    // second grip's nearest-following search skipped past the note it was
+    // meant for and landed on the rest after it instead.
+    const alignment = buildAlignment('X:1\nK:C\nV:1\nCDEF|\nV:comp\n$0-xx34xx$C4 $3-012345$D4 z4|\n');
+    const gripA = { startFret: 0, frets: [null, null, 3, 4, null, null] };
+    const gripB = { startFret: 3, frets: [0, 1, 2, 3, 4, 5] };
+    expect(alignment.lines[0].grips).toEqual([gripA, gripB, gripB]);
   });
 
   it('does not drift past a written triplet in the comping voice itself', () => {
@@ -165,9 +187,8 @@ function buildExpansion(raw: string) {
   const { cleanAbc, grips } = extractChordGrips(raw);
   const tune = parseTune(cleanAbc);
   const flattened = flattenTune(tune);
-  const chordGripOverlay = computeChordGripOverlay(flattened, grips, cleanAbc);
   const compingVoice = extractCompingVoice(tune, cleanAbc)!;
-  const alignment = alignCompingToGrips(compingVoice, flattened, chordGripOverlay);
+  const alignment = alignCompingToGrips(compingVoice, flattened, grips, cleanAbc);
   return { cleanAbc, expanded: expandCompingVoice(cleanAbc, compingVoice, alignment) };
 }
 
@@ -205,6 +226,24 @@ describe('expandCompingVoice', () => {
     const { expanded } = buildExpansion('X:1\nK:C\nV:1\n$0-xx34xx$CDEF|\nV:comp\n(C2C2)|\n');
     expect(expanded).toContain('\n(C2[F,B,]2)|');
     expect(expanded).not.toContain('[F,B,](');
+  });
+
+  it('expands a note directly after a grip marker, not just notes with plain leading whitespace', () => {
+    // Reproduces a real reported bug: the note directly after a $grip$ marker
+    // has its startChar anchored back at the marker's blanked-out position
+    // (the same abcjs quirk fixed for alignment above), so slicing from the
+    // raw startChar/endChar for the text-splice picked up leading whitespace
+    // and durationSuffixOf's anchored regex always failed on it — silently
+    // skipping the edit and leaving the placeholder pitch in the ABC actually
+    // sent to playback/print, even though SheetView (which never re-slices
+    // the text) showed the correct grip.
+    const { expanded } = buildExpansion('X:1\nK:C\nV:1\nCDEF|\nV:comp\n$0-xx34xx$C4 $3-012345$D4|\n');
+    expect(expanded).toContain('[F,B,]4');
+    // Second grip { startFret: 3, frets: [0,1,2,3,4,5] } -> MIDI 43,49,55,61,66,72
+    // (already verified in the gripToMidiNotes tests above) -> G,,/^C,/G,/^C/^F/c
+    expect(expanded).toContain('[G,,^C,G,^C^Fc]4');
+    expect(expanded).not.toContain('C4');
+    expect(expanded).not.toContain('D4');
   });
 
   it('leaves a decorated comping note untouched rather than gluing a cluster onto the decoration', () => {

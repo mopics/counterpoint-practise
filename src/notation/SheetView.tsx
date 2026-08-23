@@ -76,7 +76,7 @@ function parseSheet(abcSource: string): ParsedSheet {
   const scaleDegrees = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
   const chordGrips = computeChordGripOverlay(flattened, grips, cleanAbc);
   const compingVoice = extractCompingVoice(tune, cleanAbc);
-  const compingAlignment = compingVoice ? alignCompingToGrips(compingVoice, flattened, chordGrips) : null;
+  const compingAlignment = compingVoice ? alignCompingToGrips(compingVoice, flattened, grips, cleanAbc) : null;
 
   // Extra vertical space per line is reserved only for tunes that actually
   // use a chord grip, so every tune that doesn't use this feature keeps
