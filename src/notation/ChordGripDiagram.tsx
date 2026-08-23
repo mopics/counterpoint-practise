@@ -17,6 +17,18 @@ interface Props {
   y: number;
 }
 
+/**
+ * Which grid row (0-indexed) a fret value's dot belongs in. When startFret is
+ * 0, fret value 0 never reaches here (it's the open-string circle drawn above
+ * the grid, not a cell), so the first real cell is only ever used by fret
+ * value 1 — the mapping shifts back by one. When startFret > 0, fret value 0
+ * means "play exactly at startFret" and does need a visible dot, so cell 0
+ * already corresponds to fret value 0 with no shift.
+ */
+export function dotCellIndex(fret: number, startFret: number): number {
+  return startFret === 0 ? fret - 1 : fret;
+}
+
 /** A fixed 6-string x 6-fret-row guitar chord-grip diagram, drawn below a chord symbol. */
 export function ChordGripDiagram({ spec, x, y }: Props) {
   const gridTopY = y + CHORD_GRIP_MUTE_OPEN_ROW_HEIGHT;
@@ -71,7 +83,7 @@ export function ChordGripDiagram({ spec, x, y }: Props) {
 
       {spec.frets.map((fret, i) => {
         if (fret === null || (fret === 0 && spec.startFret === 0)) return null;
-        const dotY = gridTopY + fret * CHORD_GRIP_FRET_SPACING + CHORD_GRIP_FRET_SPACING / 2;
+        const dotY = gridTopY + dotCellIndex(fret, spec.startFret) * CHORD_GRIP_FRET_SPACING + CHORD_GRIP_FRET_SPACING / 2;
         return <circle key={`dot-${i}`} cx={stringX(i)} cy={dotY} r={2} className="stroke-none" />;
       })}
 
