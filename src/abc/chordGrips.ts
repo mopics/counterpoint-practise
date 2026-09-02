@@ -14,7 +14,9 @@ export interface ChordGripMarker {
 }
 
 const MARKER_RE = /\$(.*?)\$/g;
-const VALID_CONTENT_RE = /^(\d)-([0-5x]{6})$/;
+// Start fret is 1 or 2 digits — jazz voicings routinely move up past fret 9
+// (e.g. a barre shape at fret 10 or 12), so a single digit isn't enough.
+const VALID_CONTENT_RE = /^(\d{1,2})-([0-5x]{6})$/;
 
 function decodeSpec(content: string): ChordGripSpec | null {
   const match = VALID_CONTENT_RE.exec(content);
@@ -25,7 +27,7 @@ function decodeSpec(content: string): ChordGripSpec | null {
 }
 
 /**
- * Extracts `$<startFret>-<6 fret chars>$` chord-grip markers from raw ABC
+ * Extracts `$<startFret 1-2 digits>-<6 fret chars>$` chord-grip markers from raw ABC
  * text, mirroring keyMarkers.ts: each match is replaced with whitespace of
  * the same length (preserving every other character's offset) so the
  * cleaned text is safe to hand to abcjs/parseTune unchanged. `$` has no
@@ -51,6 +53,30 @@ export interface ChordGripOverlay {
   lines: ChordGripOverlayLine[];
 }
 
+const VOICE_HEADER_RE = /^V:\s*(\S+)/gm;
+
+/**
+ * Char ranges of `cleanAbc` covered by a `V:comp` voice block (from its
+ * header up to the next voice header, or end of text) — mirrors
+ * chordComping.ts's own `COMPING_VOICE_HEADER_RE` detection. A grip written
+ * inside one of these ranges is authored for the comping voice's own
+ * alignment (see alignCompingToGrips) and must never be picked up by the
+ * melody overlay below, even though it precedes a later melody event in raw
+ * char order.
+ */
+function compingVoiceRanges(cleanAbc: string): { start: number; end: number }[] {
+  const headers = [...cleanAbc.matchAll(VOICE_HEADER_RE)].map((m) => ({
+    index: m.index,
+    isComp: /^comp\b/.test(m[1]),
+  }));
+  return headers
+    .filter((h) => h.isComp)
+    .map((h) => ({
+      start: h.index,
+      end: headers.find((other) => other.index > h.index)?.index ?? cleanAbc.length,
+    }));
+}
+
 /**
  * Attaches each grip marker to the single note/rest event it directly
  * precedes in the source text (the same "which event does this marker sit
@@ -60,13 +86,23 @@ export interface ChordGripOverlay {
  * written, and with no persistence: each grip attaches to exactly one event
  * and is then consumed, unlike a root marker which stays in effect going
  * forward.
+ *
+ * Grips written inside a `V:comp` block are excluded here: they belong to
+ * the comping voice's own alignment, not the melody stave, and would
+ * otherwise leak onto the next melody event that happens to follow them in
+ * the raw text (e.g. the first note of the next melody line after a V:comp
+ * block sitting between two V:1 lines).
  */
 export function computeChordGripOverlay(
   flattened: FlattenedTune,
   grips: ChordGripMarker[],
   cleanAbc: string,
 ): ChordGripOverlay {
-  const sortedGrips = [...grips].sort((a, b) => a.charOffset - b.charOffset);
+  const compRanges = compingVoiceRanges(cleanAbc);
+  const melodyGrips = grips.filter(
+    (g) => !compRanges.some((r) => g.charOffset >= r.start && g.charOffset < r.end),
+  );
+  const sortedGrips = [...melodyGrips].sort((a, b) => a.charOffset - b.charOffset);
   let gripIdx = 0;
 
   const allRefs: { lineIndex: number; eventIndex: number; onsetChar: number }[] = [];

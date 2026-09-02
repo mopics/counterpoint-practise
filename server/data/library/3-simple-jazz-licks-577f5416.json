@@ -3,7 +3,7 @@
   "type": "tune",
   "parentId": "jens-larsen-8a9a1dac",
   "title": "3 simple Jazz Licks",
-  "data": "X:1\nT: 3 Simple Jazz Licks\nQ:200\nM:4/4\nL:1/8\nK:Bb\nV:1\n\"G-6\" dcB_G =G4\nV:comp\n$0-312333$ c z $0-312333$ c z4",
+  "data": "X:1\nT: 3 Simple Jazz Licks - Enclosures, Pivot Arpeggios & Interval Skips\nQ:100\nM:4/4\nL:1/8\nK:C\nT:0:35\n\"D-7\"GE (3FAc e_ec^c | \"G7\" d^A=Bd fa (3g/a/gf | \"C^\"eB=d_d cEBA |\nT:1:41\n\"C\"dBc2 f^de2 | a^fg2 d'bc'2\nT:2:55\n\"C\"gfed Bc z2 | \"C\" gfeB dc z2 |\nT:3:07 \n\"C\" GABd Bc z2 | \"C\" gfeB dc z2 |\nT:3:42 \n\"C^\" ga_ag fe_ed | \"C^\" c z7 |\n\"C^\" b^fag =f^dec- |c8|\nT:4:07\n\"E-7\" z4 \"A7\" z2 eg || \"D-7\" f^GAe ^cd=cA | \"G7\" B2 z6 |\nT:5:07\n\"C^\" cegb agfe | \"C^\" c'egb agfe |\n\"C^\" CEGB cEGB | \"D-7\" DFAc dFAc | \"E-7\" EGBd eGBd | \"F^\" FAce fAce |\n\"D-7\" fAce dcA^A | \"G7\" Bdfa ^fg=f^d | \"C^\" eGBd z4 |\nT:7:30\n\"C^\" c'egb a4 | \"C^\" c'eba-a4 | \"C^\" eGdc-c4 |\nT:8:11\n\"C^\" z d'c'e bazg-|\"D-7\"g2 fc \"G7\" e2g2 || \"C^\" d8 |\nT:8:27\n\"C^\" egbd' c'^deb | a_agf ec-c2 |\n\"C^\" c'e^de b^fag | fgec-c4 |",
   "createdAt": "2026-08-23T07:38:44.828Z",
-  "updatedAt": "2026-08-23T08:53:13.666Z"
+  "updatedAt": "2026-08-29T18:40:46.622Z"
 }

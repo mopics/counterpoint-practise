@@ -124,7 +124,7 @@ export const YouTubePlayer = forwardRef<YouTubePlayerHandle, Props>(function You
   }, [videoId]);
 
   return (
-    <div className="aspect-video w-full">
+    <div className="aspect-video h-full">
       {loadFailed ? (
         <p className="text-sm text-slate-500">Couldn't load the YouTube player.</p>
       ) : (

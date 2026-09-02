@@ -27,7 +27,7 @@ const App = observer(function App() {
           </div>
         ) : (
           <SplitPane
-            left={
+            first={
               <SheetView
                 abcSource={editorStore.currentAbcSource(selected)}
                 cursor={playbackStore.cursor}
@@ -37,7 +37,7 @@ const App = observer(function App() {
                 onSelectionChange={playbackStore.setSelectionRange}
               />
             }
-            right={
+            second={
               <AbcEditorPanel
                 entry={selected}
                 value={editorStore.textFor(selected)}
@@ -49,6 +49,7 @@ const App = observer(function App() {
                 onSave={() => editorStore.save(selected)}
               />
             }
+            maxSecondSize={1300}
           />
         )}
       </div>

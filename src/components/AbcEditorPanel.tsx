@@ -1,6 +1,7 @@
 import type { TuneRecord } from '../api/tunesClient';
 import type { SaveStatus } from '../stores/EditorStore';
 import { VideoLoopPanel } from './VideoLoopPanel';
+import { SplitPane } from './SplitPane';
 
 interface Props {
   entry: TuneRecord;
@@ -50,13 +51,21 @@ export function AbcEditorPanel({ entry, value, edited, saveStatus, saveError, on
           </button>
         )}
       </div>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        spellCheck={false}
-        className="min-h-0 flex-1 resize-none p-3 font-mono text-sm text-slate-800 outline-none"
+      <SplitPane
+        orientation="vertical"
+        defaultSecondSize={280}
+        minSecondSize={100}
+        maxSecondSize={750}
+        first={
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            spellCheck={false}
+            className="h-full min-h-0 w-full resize-none p-3 font-mono text-sm text-slate-800 outline-none"
+          />
+        }
+        second={<VideoLoopPanel key={entry.id} entry={entry} />}
       />
-      <VideoLoopPanel key={entry.id} entry={entry} />
     </div>
   );
 }

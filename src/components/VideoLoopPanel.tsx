@@ -27,7 +27,7 @@ export const VideoLoopPanel = observer(function VideoLoopPanel({ entry }: Props)
   }
 
   return (
-    <div className="flex flex-col border-t border-slate-200 bg-white">
+    <div className="flex h-full min-h-0 flex-col border-t border-slate-200 bg-white">
       <div className="flex items-center gap-2 px-3 py-2">
         <span className="text-xs font-medium text-slate-700">Video</span>
         <input
@@ -47,13 +47,18 @@ export const VideoLoopPanel = observer(function VideoLoopPanel({ entry }: Props)
       </div>
       {uiStore.videoPanelExpanded && (
         <>
-          {videoId ? (
-            <YouTubePlayer ref={playerHandle} videoId={videoId} onTimeUpdate={handleTimeUpdate} />
-          ) : (
-            <div className="flex aspect-video w-full items-center justify-center bg-slate-100 text-xs text-slate-500">
-              Enter a valid YouTube URL to load a video.
-            </div>
-          )}
+          {/* min-h-0 so this can actually shrink below the video's natural (width-driven) size;
+              the video itself is sized by height (aspect-video h-full), not width, so it's the
+              one that shrinks — centered here rather than stretched to the panel's full width. */}
+          <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-black">
+            {videoId ? (
+              <YouTubePlayer ref={playerHandle} videoId={videoId} onTimeUpdate={handleTimeUpdate} />
+            ) : (
+              <div className="flex aspect-video h-full items-center justify-center bg-slate-100 text-xs text-slate-500">
+                Enter a valid YouTube URL to load a video.
+              </div>
+            )}
+          </div>
           <LoopControls
             loopStart={state.loopStart}
             loopEnd={state.loopEnd}

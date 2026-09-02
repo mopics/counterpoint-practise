@@ -13,8 +13,10 @@ import {
   PART_LABEL_WIDTH,
   dotCount,
   flagCount,
+  gripDiagramWidth,
   hasStem,
   isFilledNotehead,
+  spaceOutGripX,
 } from './geometry';
 
 interface Props {
@@ -157,13 +159,17 @@ function CompingRest({ x, y, duration }: { x: number; y: number; duration: numbe
 /** One line's worth of the chord-comping voice: grip diagrams at each chord change, plus a single rhythm line beneath the staff. */
 export function ChordCompingRow({ events, grips, melodyEvents, gripY, rhythmY }: Props) {
   const laid = layoutCompingEvents(events, grips, melodyEvents);
+  const changePoints = laid
+    .map((le, i) => ({ x: le.x, grip: le.grip, i }))
+    .filter((cp): cp is { x: number; grip: ChordGripSpec; i: number } => isChordChangePoint(laid, cp.i) && !!cp.grip);
+  const spacedX = spaceOutGripX(
+    changePoints.map((cp) => ({ x: cp.x, width: gripDiagramWidth(cp.grip.startFret > 0) })),
+  );
   return (
     <g>
-      {laid.map((le, i) =>
-        isChordChangePoint(laid, i) && le.grip ? (
-          <ChordGripDiagram key={`grip-${i}`} spec={le.grip} x={le.x} y={gripY} />
-        ) : null,
-      )}
+      {changePoints.map((cp, idx) => (
+        <ChordGripDiagram key={`grip-${cp.i}`} spec={cp.grip} x={spacedX[idx]} y={gripY} />
+      ))}
       {laid.map((le, i) =>
         // A note with no active grip yet is silent in playback (expandCompingVoice
         // splices it to a rest), so it must draw as a rest here too.

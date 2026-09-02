@@ -3,7 +3,7 @@
   "type": "tune",
   "parentId": "peter-dijkstra-226a8d64",
   "title": "Minor6 Jazz Spy Tune",
-  "data": "T: Minor6 Jazz Spy Tune\nK:Bb\nQ:120\nV:1\n[I:MIDI=gchordoff]\n\"G-6\"bg e d-_d4| \"A7\" bg  d ^c-\"D7\"c4|\"G-6\" A8- | A8 |\nV:comp\n$0-3x23xx$ c2 z3 c z2 | $5-0x01xx$ c2 z2 $4-101xxx$ c2 $4-0x01xx$ c2 | $0-3x23xx$ c2 z3 c z2\nV:1\n\"C7\" c8 | \"G-6\" g8 |\"A7\" a4\"D7\"d2\"Ab7\"_a2 | \"G-6\"G4\"C#7\" ^c4|",
+  "data": "T: Minor6 Jazz Spy Tune\nK:Bb\nQ:120\nV:1\n[I:MIDI=gchordoff]\n\"G-6\"bg e d-_d4| \"A7\" bg  d ^c-\"D7\"c4|\"G-6\" A8- | A8 |\nV:comp\n$0-3x23xx$ c2 z3 c z2 | $5-0x01xx$ c2 z2 $4-x101xx$ c2 $4-0x01xx$ c2 | $0-3x23xx$ c2 z3 c z2\nV:1\n\"C7\" c8 | \"G-6\" g8 |\"A7\" a4\"D7\"d2\"Ab7\"_a2 | \"G-6\"G4\"C#7\" ^c4|",
   "createdAt": "2026-08-17T15:06:02.488Z",
-  "updatedAt": "2026-08-23T09:11:38.165Z"
+  "updatedAt": "2026-09-01T12:01:09.372Z"
 }

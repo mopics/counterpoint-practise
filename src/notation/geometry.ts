@@ -36,6 +36,50 @@ export const CHORD_GRIP_WIDTH = CHORD_GRIP_STRING_SPACING * (CHORD_GRIP_STRING_C
 export const CHORD_GRIP_GRID_HEIGHT = CHORD_GRIP_FRET_SPACING * CHORD_GRIP_FRET_ROWS;
 export const CHORD_GRIP_MUTE_OPEN_ROW_HEIGHT = 8; // space above the nut for x/o string indicators
 export const CHORD_GRIP_TOTAL_HEIGHT = CHORD_GRIP_MUTE_OPEN_ROW_HEIGHT + CHORD_GRIP_GRID_HEIGHT;
+// Minimum clearance between one chord-grip diagram's right edge and the next
+// diagram's left edge in the same row. Diagrams are fixed-width, but the
+// notes/chord-changes they annotate can sit closer together than that in
+// time (e.g. consecutive eighth notes), so without this their fretboards
+// would visually overlap.
+export const CHORD_GRIP_MIN_GAP = 4;
+// Extra width reserved to the right of the grid when a diagram carries a
+// "Nfr" start-fret label (ChordGripDiagram draws it starting 3px past
+// CHORD_GRIP_WIDTH) — a fixed estimate generous enough for a two-digit fret
+// number at the label's small (7px) font, since SVG text has no layout-time
+// width to measure exactly.
+export const CHORD_GRIP_FRET_LABEL_WIDTH = 18;
+
+/** A diagram's total horizontal footprint, wider when it shows a start-fret label. */
+export function gripDiagramWidth(hasFretLabel: boolean): number {
+  return CHORD_GRIP_WIDTH + (hasFretLabel ? CHORD_GRIP_FRET_LABEL_WIDTH : 0);
+}
+
+export interface GripPlacement {
+  x: number;
+  /** This diagram's own horizontal footprint — see gripDiagramWidth. */
+  width: number;
+}
+
+/**
+ * Pushes each diagram's x position (items already in ascending/left-to-right
+ * order) right just enough to keep at least CHORD_GRIP_MIN_GAP between its
+ * left edge and the previous diagram's right edge (`x + width`, so a wider
+ * diagram — e.g. one with a fret-number label — pushes its successor
+ * further) — a standard cascading push-right, so one crowded pair doesn't
+ * just shove everything after it by the same fixed amount regardless of how
+ * much room was already there. Never moves a diagram left of its natural
+ * position.
+ */
+export function spaceOutGripX(items: GripPlacement[]): number[] {
+  const out: number[] = [];
+  let prevRightEdge = -Infinity;
+  for (const item of items) {
+    const placed = Math.max(item.x, prevRightEdge + CHORD_GRIP_MIN_GAP);
+    out.push(placed);
+    prevRightEdge = placed + item.width;
+  }
+  return out;
+}
 
 // Layout variants used only for tunes that actually contain a chord grip
 // (checked once per tune, not per line — see SheetView.parseSheet) so tunes

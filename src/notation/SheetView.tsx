@@ -4,10 +4,10 @@ import { flattenTune } from '../abc/flatten';
 import type { EventRef, FlattenedTune } from '../abc/types';
 import { isEventInRange } from '../abc/eventRef';
 import { extractKeyMarkers } from '../abc/keyMarkers';
-import { extractChordGrips, computeChordGripOverlay, type ChordGripOverlay } from '../abc/chordGrips';
+import { extractChordGrips, computeChordGripOverlay, type ChordGripOverlay, type ChordGripSpec } from '../abc/chordGrips';
 import { extractCompingVoice, alignCompingToGrips, type CompingVoice, type CompingAlignment } from '../abc/chordComping';
 import { computeScaleDegrees, type ScaleDegreeOverlay } from '../abc/scaleDegrees';
-import { layoutLine, type LineLayout } from './layout';
+import { layoutLine, type LineLayout, type LayoutEvent } from './layout';
 import { Staff } from './Staff';
 import { PartLabel } from './PartLabel';
 import { ChordSymbolRow } from './ChordSymbolRow';
@@ -36,6 +36,8 @@ import {
   STAFF_HEIGHT,
   STAFF_TOP_OFFSET,
   STAFF_TOP_OFFSET_WITH_GRIPS,
+  gripDiagramWidth,
+  spaceOutGripX,
 } from './geometry';
 
 interface Props {
@@ -242,12 +244,22 @@ export const SheetView = memo(function SheetView({
                 rootHints={numeralMode ? scaleDegrees.lines[ll.lineIndex]?.rootHints : undefined}
               />
               {hasGrips &&
-                ll.events.map((le) => {
-                  const grip = chordGrips.lines[ll.lineIndex]?.grips[le.eventIndex];
-                  return grip ? (
-                    <ChordGripDiagram key={`grip-${le.eventIndex}`} spec={grip} x={le.x} y={ll.staffTopY + CHORD_GRIP_Y_OFFSET} />
-                  ) : null;
-                })}
+                (() => {
+                  const gripped: { le: LayoutEvent; grip: ChordGripSpec }[] = ll.events
+                    .map((le) => ({ le, grip: chordGrips.lines[ll.lineIndex]?.grips[le.eventIndex] ?? null }))
+                    .filter((g): g is { le: LayoutEvent; grip: ChordGripSpec } => !!g.grip);
+                  const spacedX = spaceOutGripX(
+                    gripped.map((g) => ({ x: g.le.x, width: gripDiagramWidth(g.grip.startFret > 0) })),
+                  );
+                  return gripped.map((g, i) => (
+                    <ChordGripDiagram
+                      key={`grip-${g.le.eventIndex}`}
+                      spec={g.grip}
+                      x={spacedX[i]}
+                      y={ll.staffTopY + CHORD_GRIP_Y_OFFSET}
+                    />
+                  ));
+                })()}
               {compingVoice && (
                 <ChordCompingRow
                   events={compingVoice.lines[ll.lineIndex]?.events ?? []}

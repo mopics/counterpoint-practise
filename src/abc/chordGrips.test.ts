@@ -63,9 +63,26 @@ describe('extractChordGrips', () => {
     expect(grips[0]?.spec).toEqual({ startFret: 0, frets: [null, 0, null, 0, null, 0] });
   });
 
-  it('allows a two-digit-free single-digit start fret up through 9', () => {
+  it('allows a single-digit start fret up through 9', () => {
     const { grips } = extractChordGrips('$9-012345$');
     expect(grips[0]?.spec.startFret).toBe(9);
+  });
+
+  it('allows a two-digit start fret, for a voicing moved further up the neck', () => {
+    const { grips } = extractChordGrips('$12-012345$');
+    expect(grips[0]?.spec.startFret).toBe(12);
+  });
+
+  it('preserves string length exactly with a two-digit start fret (offset stability)', () => {
+    const raw = 'CD$12-012345$EF';
+    const { cleanAbc } = extractChordGrips(raw);
+    expect(cleanAbc.length).toBe(raw.length);
+    expect(cleanAbc).toBe(`CD${' '.repeat('$12-012345$'.length)}EF`);
+  });
+
+  it('rejects a three-digit start fret and drops the marker', () => {
+    const { grips } = extractChordGrips('$123-012345$');
+    expect(grips).toEqual([]);
   });
 });
 
@@ -134,5 +151,18 @@ describe('computeChordGripOverlay', () => {
       { startFret: 3, frets: [0, 1, 2, 3, 4, 5] },
       null,
     ]);
+  });
+
+  it('does not leak a grip written inside V:comp onto the next melody line', () => {
+    // The grip sits inside the V:comp block, textually between melody line 1
+    // and melody line 2. It's meant only for the comping voice's own
+    // alignment (see alignCompingToGrips) and must never attach to the first
+    // melody event of line 2 just because it's the nearest melody event that
+    // follows it in char order.
+    const raw = 'X:1\nK:C\nV:1\nCDEF|\nV:comp\n$0-xx34xx$C8|\nV:1\nGABc|\n';
+    const { cleanAbc, grips } = extractChordGrips(raw);
+    const flattened = flattenTune(parseTune(cleanAbc));
+    const overlay = computeChordGripOverlay(flattened, grips, cleanAbc);
+    expect(overlay.lines[1].grips).toEqual([null, null, null, null]);
   });
 });
