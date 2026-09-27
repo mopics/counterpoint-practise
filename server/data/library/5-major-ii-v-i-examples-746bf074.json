@@ -1,0 +1,9 @@
+{
+  "id": "5-major-ii-v-i-examples-746bf074",
+  "type": "tune",
+  "parentId": "ch8-72c57625",
+  "title": "5 Major II V  I Examples",
+  "data": "T: 5 Major II V I Examples\nC: Jens\nQ:80\nV:1\nd8 | d8 | d8 | d8 |d8 |d8|\nV:comp\n$10-0xxxxx$c $10-xx00xx$c z $10-0xxxxx$c $10-xx00xx$c2 $8-xx220x$c2 | $9-x1011x$cc z2 $9-xx0111$c2 $9-xx0113$c2 | $8-0x1102$c2 z $8-0xxxxx$c $9-xx00xx$c2 $8-xx110x$c $9-xx001x$c |",
+  "createdAt": "2026-09-02T14:53:06.133Z",
+  "updatedAt": "2026-09-02T15:15:57.185Z"
+}

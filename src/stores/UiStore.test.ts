@@ -34,6 +34,60 @@ describe('UiStore', () => {
     expect(uiStore.numeralMode).toBe(true);
   });
 
+  it('defaults zodiacMode to false when nothing is persisted', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.zodiacMode).toBe(false);
+  });
+
+  it('toggleZodiacMode flips the value', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    const initial = uiStore.zodiacMode;
+    uiStore.toggleZodiacMode();
+    expect(uiStore.zodiacMode).toBe(!initial);
+  });
+
+  it('persists the toggled zodiacMode value to localStorage', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.toggleZodiacMode();
+    expect(localStorage.getItem('zodiacMode')).toBe(String(uiStore.zodiacMode));
+  });
+
+  it('loads a persisted true zodiacMode value on module init', async () => {
+    localStorage.setItem('zodiacMode', 'true');
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.zodiacMode).toBe(true);
+  });
+
+  it('toggleZodiacMode turns numeralMode off when it was on', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.toggleNumeralMode();
+    expect(uiStore.numeralMode).toBe(true);
+    uiStore.toggleZodiacMode();
+    expect(uiStore.zodiacMode).toBe(true);
+    expect(uiStore.numeralMode).toBe(false);
+    expect(localStorage.getItem('numeralMode')).toBe('false');
+    expect(localStorage.getItem('zodiacMode')).toBe('true');
+  });
+
+  it('toggleNumeralMode turns zodiacMode off when it was on', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.toggleZodiacMode();
+    expect(uiStore.zodiacMode).toBe(true);
+    uiStore.toggleNumeralMode();
+    expect(uiStore.numeralMode).toBe(true);
+    expect(uiStore.zodiacMode).toBe(false);
+    expect(localStorage.getItem('zodiacMode')).toBe('false');
+    expect(localStorage.getItem('numeralMode')).toBe('true');
+  });
+
+  it('toggling a mode back off does not spuriously re-enable the other', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.toggleZodiacMode(); // zodiac on, numeral off
+    uiStore.toggleZodiacMode(); // zodiac off again
+    expect(uiStore.zodiacMode).toBe(false);
+    expect(uiStore.numeralMode).toBe(false);
+  });
+
   it('defaults videoPanelExpanded to true when nothing is persisted', async () => {
     const { default: uiStore } = await import('./UiStore');
     expect(uiStore.videoPanelExpanded).toBe(true);
@@ -127,5 +181,55 @@ describe('UiStore', () => {
     localStorage.setItem('sidebarWidth', '900');
     const { default: uiStore } = await import('./UiStore');
     expect(uiStore.sidebarWidth).toBe(480);
+  });
+
+  it('defaults tcaLastInstrumentKey to null when nothing is persisted', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.tcaLastInstrumentKey).toBeNull();
+  });
+
+  it('setTcaLastInstrumentKey updates the value and persists it', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.setTcaLastInstrumentKey('tenorSax');
+    expect(uiStore.tcaLastInstrumentKey).toBe('tenorSax');
+    expect(localStorage.getItem('tcaLastInstrumentKey')).toBe('tenorSax');
+  });
+
+  it('loads a persisted tcaLastInstrumentKey value on module init', async () => {
+    localStorage.setItem('tcaLastInstrumentKey', 'guitar');
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.tcaLastInstrumentKey).toBe('guitar');
+  });
+
+  it('setTcaLastInstrumentKey(null) clears the persisted value', async () => {
+    localStorage.setItem('tcaLastInstrumentKey', 'guitar');
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.setTcaLastInstrumentKey(null);
+    expect(uiStore.tcaLastInstrumentKey).toBeNull();
+    expect(localStorage.getItem('tcaLastInstrumentKey')).toBeNull();
+  });
+
+  it('defaults tcaLastExerciseType to 1 when nothing is persisted', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.tcaLastExerciseType).toBe(1);
+  });
+
+  it('setTcaLastExerciseType updates the value and persists it', async () => {
+    const { default: uiStore } = await import('./UiStore');
+    uiStore.setTcaLastExerciseType(3);
+    expect(uiStore.tcaLastExerciseType).toBe(3);
+    expect(localStorage.getItem('tcaLastExerciseType')).toBe('3');
+  });
+
+  it('loads a persisted tcaLastExerciseType value on module init', async () => {
+    localStorage.setItem('tcaLastExerciseType', '2');
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.tcaLastExerciseType).toBe(2);
+  });
+
+  it('falls back to the default tcaLastExerciseType for a corrupted persisted value', async () => {
+    localStorage.setItem('tcaLastExerciseType', 'not-a-type');
+    const { default: uiStore } = await import('./UiStore');
+    expect(uiStore.tcaLastExerciseType).toBe(1);
   });
 });

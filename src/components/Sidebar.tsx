@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { libraryStore, uiStore } from '../stores';
 import type { FolderRecord, LibraryNode } from '../api/tunesClient';
 import { Breadcrumb } from './Breadcrumb';
+import { TcaGeneratorForm } from './TcaGeneratorForm';
 
 const COLLAPSED_WIDTH = 40;
 
@@ -224,6 +225,7 @@ export const Sidebar = observer(function Sidebar() {
               + Tune
             </button>
           </div>
+          <TcaGeneratorForm />
         </div>
       </aside>
       <div

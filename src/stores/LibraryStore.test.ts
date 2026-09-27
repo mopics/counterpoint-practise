@@ -197,6 +197,28 @@ describe('LibraryStore', () => {
     expect(libraryStore.childrenOf(null)).toEqual([]);
   });
 
+  it('createTune defaults data to an empty string when omitted', async () => {
+    const libraryStore = await freshStore([]);
+    tunesClientMocks.createTune.mockResolvedValue(tune({ id: 'new-t', title: 'New Tune', parentId: null }));
+
+    await libraryStore.createTune('New Tune');
+
+    expect(tunesClientMocks.createTune).toHaveBeenCalledWith({ parentId: null, title: 'New Tune', data: '' });
+  });
+
+  it('createTune passes through a given data string (e.g. generated ABC)', async () => {
+    const libraryStore = await freshStore([]);
+    tunesClientMocks.createTune.mockResolvedValue(tune({ id: 'new-t', title: 'New Tune', parentId: null }));
+
+    await libraryStore.createTune('New Tune', 'X:1\nT:New Tune\nK:C\nCDEF|\n');
+
+    expect(tunesClientMocks.createTune).toHaveBeenCalledWith({
+      parentId: null,
+      title: 'New Tune',
+      data: 'X:1\nT:New Tune\nK:C\nCDEF|\n',
+    });
+  });
+
   it('rename on a folder calls renameFolder and patches the local node', async () => {
     const f = folder({ id: 'f1', title: 'Old Name' });
     const libraryStore = await freshStore([f]);

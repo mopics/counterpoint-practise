@@ -38,7 +38,7 @@ const DEGREE_LABEL_SHARP: Record<number, string> = {
  * that assumed a bare letter would silently miss the table and fall back to
  * pitch class 0 (C) for every explicitly-accidented note.
  */
-function extractLetter(name: string): string {
+export function extractLetter(name: string): string {
   return (name.match(/[A-Ga-g]/)?.[0] ?? 'C').toUpperCase();
 }
 

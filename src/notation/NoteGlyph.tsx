@@ -27,6 +27,7 @@ interface Props {
   stemUp: boolean;
   selected?: boolean;
   scaleDegrees?: string[];
+  zodiac?: string[];
 }
 
 function NoteHead({
@@ -66,7 +67,7 @@ function NoteHead({
   );
 }
 
-export function NoteGlyph({ x, pitches, duration, staffBottomY, noteheadStyle, beamed, stemUp: up, selected, scaleDegrees }: Props) {
+export function NoteGlyph({ x, pitches, duration, staffBottomY, noteheadStyle, beamed, stemUp: up, selected, scaleDegrees, zodiac }: Props) {
   if (!pitches.length) return null;
   const filled = isFilledNotehead(duration);
   const stemmed = hasStem(duration);
@@ -123,10 +124,11 @@ export function NoteGlyph({ x, pitches, duration, staffBottomY, noteheadStyle, b
       {pitches.map((p, i) => {
         const y = pitchToY(p.pitch, staffBottomY);
         const degree = scaleDegrees?.[i];
+        const zodiacGlyph = zodiac?.[i];
         const color = selected ? '#2563eb' : '#0f172a';
         return (
           <g key={i}>
-            {!degree && p.accidental && (
+            {!degree && !zodiacGlyph && p.accidental && (
               <AccidentalGlyph
                 x={x - NOTE_RADIUS - 9}
                 y={y}
@@ -138,10 +140,15 @@ export function NoteGlyph({ x, pitches, duration, staffBottomY, noteheadStyle, b
               <text x={x} y={y + 4} textAnchor="middle" fontSize={11} fontFamily="Arial, sans-serif" fill={color}>
                 {degree}
               </text>
+            ) : zodiacGlyph ? (
+              <text x={x} y={y + 4} textAnchor="middle" fontSize={14} fontFamily="Arial, sans-serif" fill={color}>
+                {zodiacGlyph}
+              </text>
             ) : (
               <NoteHead cx={x} cy={y} filled={filled} style={noteheadStyle} selected={selected} />
             )}
             {!degree &&
+              !zodiacGlyph &&
               dots > 0 &&
               Array.from({ length: dots }).map((_, dotIndex) => (
                 <circle

@@ -34,6 +34,7 @@ const App = observer(function App() {
                 selectionStart={playbackStore.loopStart}
                 selectionEnd={playbackStore.loopEnd}
                 numeralMode={uiStore.numeralMode}
+                zodiacMode={uiStore.zodiacMode}
                 onSelectionChange={playbackStore.setSelectionRange}
               />
             }

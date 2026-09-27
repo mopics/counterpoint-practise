@@ -3,12 +3,24 @@ import type { AccidentalName } from 'abcjs';
 import { parseTune } from './parseTune';
 import { flattenTune } from './flatten';
 import { extractKeyMarkers } from './keyMarkers';
-import { computeScaleDegrees, pitchClassOf, degreeLabel } from './scaleDegrees';
+import { computeScaleDegrees, pitchClassOf, degreeLabel, extractLetter } from './scaleDegrees';
 import type { NotationPitch } from './types';
 
 function pitch(name: string, accidental?: AccidentalName): NotationPitch {
   return { pitch: 0, name, accidental, verticalPos: 0, tieStart: false, tieEnd: false, slurStart: [], slurEnd: [] };
 }
+
+describe('extractLetter', () => {
+  it('returns the bare letter from a name carrying an ABC accidental prefix', () => {
+    expect(extractLetter('^G')).toBe('G');
+    expect(extractLetter('_A')).toBe('A');
+    expect(extractLetter('=B')).toBe('B');
+  });
+
+  it('returns the letter unchanged when there is no accidental prefix', () => {
+    expect(extractLetter('C')).toBe('C');
+  });
+});
 
 describe('pitchClassOf', () => {
   it('resolves a natural note with no accidental and no key implication', () => {

@@ -7,6 +7,7 @@ import { extractKeyMarkers } from '../abc/keyMarkers';
 import { extractChordGrips, computeChordGripOverlay, type ChordGripOverlay, type ChordGripSpec } from '../abc/chordGrips';
 import { extractCompingVoice, alignCompingToGrips, type CompingVoice, type CompingAlignment } from '../abc/chordComping';
 import { computeScaleDegrees, type ScaleDegreeOverlay } from '../abc/scaleDegrees';
+import { computeZodiacOverlay, type ZodiacOverlay } from '../abc/zodiacOverlay';
 import { layoutLine, type LineLayout, type LayoutEvent } from './layout';
 import { Staff } from './Staff';
 import { PartLabel } from './PartLabel';
@@ -46,6 +47,7 @@ interface Props {
   selectionStart?: EventRef | null;
   selectionEnd?: EventRef | null;
   numeralMode?: boolean;
+  zodiacMode?: boolean;
   onSelectionChange?: (start: EventRef | null, end: EventRef | null) => void;
 }
 
@@ -54,6 +56,7 @@ interface ParsedSheet {
   layouts: Map<number, LineLayout>;
   slurSpans: SlurSpan[];
   scaleDegrees: ScaleDegreeOverlay;
+  zodiac: ZodiacOverlay;
   chordGrips: ChordGripOverlay;
   hasGrips: boolean;
   compingVoice: CompingVoice | null;
@@ -76,6 +79,7 @@ function parseSheet(abcSource: string): ParsedSheet {
   const flattened = flattenTune(tune);
   if (flattened.lines.length === 0) throw new Error('No parseable tune content');
   const scaleDegrees = computeScaleDegrees(flattened, markers, flattened.keyRoot, cleanAbc);
+  const zodiac = computeZodiacOverlay(flattened);
   const chordGrips = computeChordGripOverlay(flattened, grips, cleanAbc);
   const compingVoice = extractCompingVoice(tune, cleanAbc);
   const compingAlignment = compingVoice ? alignCompingToGrips(compingVoice, flattened, grips, cleanAbc) : null;
@@ -105,6 +109,7 @@ function parseSheet(abcSource: string): ParsedSheet {
     layouts,
     slurSpans,
     scaleDegrees,
+    zodiac,
     chordGrips,
     hasGrips,
     compingVoice,
@@ -144,6 +149,7 @@ export const SheetView = memo(function SheetView({
   selectionStart,
   selectionEnd,
   numeralMode,
+  zodiacMode,
   onSelectionChange,
 }: Props) {
   const dragAnchor = useRef<EventRef | null>(null);
@@ -173,6 +179,7 @@ export const SheetView = memo(function SheetView({
     layouts,
     slurSpans,
     scaleDegrees,
+    zodiac,
     chordGrips,
     hasGrips,
     compingVoice,
@@ -305,6 +312,7 @@ export const SheetView = memo(function SheetView({
                       scaleDegrees={
                         numeralMode ? (scaleDegrees.lines[ll.lineIndex]?.degrees[le.eventIndex] ?? undefined) : undefined
                       }
+                      zodiac={zodiacMode ? (zodiac.lines[ll.lineIndex]?.glyphs[le.eventIndex] ?? undefined) : undefined}
                     />
                     {le.event.decorations.length > 0 && (
                       <OrnamentGlyphs

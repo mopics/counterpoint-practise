@@ -147,8 +147,8 @@ class LibraryStore {
     return true;
   }
 
-  async createTune(title: string): Promise<TuneRecord | null> {
-    const record = await apiCreateTune({ parentId: this.currentFolderId, title, data: '' });
+  async createTune(title: string, data = ''): Promise<TuneRecord | null> {
+    const record = await apiCreateTune({ parentId: this.currentFolderId, title, data });
     if (!record) return null;
     runInAction(() => {
       this.insertNode(record);

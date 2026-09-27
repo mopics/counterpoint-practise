@@ -91,6 +91,9 @@ export const TransportBar = observer(function TransportBar() {
       <Button tooltip="Toggle numeric scale degrees" onClick={() => uiStore.toggleNumeralMode()} active={uiStore.numeralMode}>
         🔢
       </Button>
+      <Button tooltip="Toggle zodiac sign noteheads" onClick={() => uiStore.toggleZodiacMode()} active={uiStore.zodiacMode}>
+        ♈
+      </Button>
       <Button tooltip="Print"
         disabled={!libraryStore.selected}
         onClick={() => {
